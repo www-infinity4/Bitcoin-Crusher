@@ -246,7 +246,8 @@ window.RESEARCH = (() => {
         enriched.tokenValue = node.tokenValue;
         enriched.tokenColor = node.tokenColor;
         enriched.tokenDateTime = node.tokenDateTime;
-        enriched.knowledgeStage = node.stage;
+        enriched.tokenFunction = node.tokenFunction;
+        enriched.colorMeaning = node.colorMeaning;
       }
     }
     catalogBrief(enriched);
