@@ -131,7 +131,15 @@
   <main class="main">
     <section class="hero">
       <h1 class="hero-title">∞ Infinity Slot Machine</h1>
-      <p class="hero-sub">Spin the reels. Crush Bitcoin. Every spin generates a unique scientific research token committed forever to the repo.</p>
+      <p class="hero-sub">Enter your own idea or search topic, then spin. Your exact words drive real source discovery and generate a hashed research token.</p>
+      <div class="panel" style="margin-top:18px;text-align:left">
+        <div class="panel-head"><span class="panel-title">YOUR IDEA OR SEARCH TOPIC</span><span class="panel-hint">Required before spinning</span></div>
+        <div class="panel-body">
+          <label class="form-label" for="researchIdea">Words to research and tokenize</label>
+          <textarea class="form-input" id="researchIdea" rows="3" maxlength="1000" placeholder="Example: Hydrogen energy storage, Bitcoin security, silver and copper resonance, or any subject you want researched"></textarea>
+          <div class="auth-msg" id="researchIdeaStatus">Your words will be preserved in the research packet and used to create its token ID.</div>
+        </div>
+      </div>
       <!-- Token flow visual -->
       <div class="token-flow" aria-hidden="true">
         <span class="tf-step">🟡 Spin</span>
