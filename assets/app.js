@@ -562,10 +562,7 @@
       }
 
       if (!parts.length) {
-        // Fallback: generate a research snippet using our local vocab
-        const mockSpin = { symbolLabels: ["BTC", "STAR", "DIAM"], tier: "lose", score: 0, spinNumber: 0 };
-        const art = window.RESEARCH.generateResearchArticle(mockSpin);
-        parts.push(`I could not find live search results for "<em>${escHtml(rawInput)}</em>", but here is a synthesised research perspective:<br><br>${escHtml(art.abstract)}`);
+        parts.push(`No live source summary was returned for "<em>${escHtml(rawInput)}</em>". No answer was invented. Try narrower keywords or open the <a class="chat-link" href="research-workspace.html">full research workspace</a> to search OpenAlex and Crossref.`);
       }
 
       responseHtml = parts.join("<br>");
