@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitcoin Crusher Research Integrity Tests</title>
+<style>
+body{font:16px/1.5 system-ui;max-width:900px;margin:auto;padding:24px;background:#080b18;color:#f4f6ff}h1{color:#f4c95d}.test{padding:10px 12px;margin:8px 0;border:1px solid #343c6c;border-radius:9px}.pass{border-color:#45bd84;color:#78efb2}.fail{border-color:#d94a64;color:#ff8293}code{color:#57d7ff;overflow-wrap:anywhere}.summary{font-weight:800;font-size:20px;margin:20px 0}
+</style>
+</head>
+<body>
+<h1>Research Integrity Browser Tests</h1>
+<p>These tests use controlled scholarly fixtures. They do not call live APIs or create GitHub records.</p>
+<div id="results"></div>
+<div id="summary" class="summary">Running…</div>
+<script>
+const openAlexFixture={results:[{
+ id:"https://openalex.org/W1",title:"Measured Energy Use in Proof-of-Work Systems",publication_year:2025,cited_by_count:14,
+ doi:"https://doi.org/10.1000/example.1",primary_location:{landing_page_url:"https://doi.org/10.1000/example.1",source:{display_name:"Journal of Verified Fixtures"}},
+ authorships:[{author:{display_name:"Ada Test"}}],
+ abstract_inverted_index:{This:[0],fixture:[1],reports:[2],measured:[3],energy:[4],use:[5],with:[6],stated:[7],limitations:[8]}
+}]};
+const crossrefFixture={message:{items:[{
+ DOI:"10.1000/example.1",title:["Measured Energy Use in Proof-of-Work Systems"],author:[{given:"Ada",family:"Test"}],
+ published:{"date-parts":[[2025]]},"container-title":["Journal of Verified Fixtures"],URL:"https://doi.org/10.1000/example.1","is-referenced-by-count":14,type:"journal-article"
+},{
+ DOI:"10.1000/example.2",title:["Lifecycle Boundaries for Computing Infrastructure"],author:[{given:"Ben",family:"Check"}],
+ published:{"date-parts":[[2024]]},"container-title":["Fixture Methods"],URL:"https://doi.org/10.1000/example.2","is-referenced-by-count":5,type:"journal-article"
+}]}};
+window.fetch=async url=>({ok:true,status:200,json:async()=>String(url).includes("openalex")?openAlexFixture:crossrefFixture});
+</script>
+<script src="../assets/research.js"></script>
+<script>
+(async()=>{
+ const output=document.getElementById("results"),tests=[];
+ function test(name,condition,detail=""){tests.push({name,condition:!!condition,detail})}
+ const spin={symbolLabels:["BTC","GOLD","STAR"],score:25,spinNumber:7,tier:"win-small"};
+ const pending=window.RESEARCH.generateResearchArticle(spin);
+ test("Pending brief uses the versioned schema",pending.schema==="infinity-research-brief/v1");
+ test("Game score is explicitly simulated",pending.simulatedGameScore===25);
+ test("Pending brief contains no invented authors",pending.authors.length===0);
+ test("Pending brief contains no invented DOI",pending.doi==="");
+ test("Pending state claims no scientific result",pending.evidenceStatus==="pending-source-retrieval"&&/No results yet/.test(pending.results));
+ const enriched=await window.RESEARCH.enrichWithSearch(pending);
+ test("OpenAlex and Crossref records are retrieved",enriched.searchEnriched&&enriched.sources.length===2,"sources="+enriched.sources.length);
+ test("Duplicate DOI records are deduplicated",enriched.sources.filter(x=>x.doi==="10.1000/example.1").length===1);
+ test("References contain real fixture DOIs",enriched.references.some(x=>x.includes("10.1000/example.1"))&&enriched.references.some(x=>x.includes("10.1000/example.2")));
+ test("Abstract-level evidence is labeled provisional",enriched.fullTextsReviewed===0&&/full-text review/i.test(enriched.discussion));
+ test("Research package has a SHA-256 digest",/^[a-f0-9]{64}$/.test(enriched.hash),enriched.hash);
+ test("No game score is presented as Bitcoin revenue",enriched.simulatedGameScore===25&&!Object.prototype.hasOwnProperty.call(enriched,"bitcoinRevenue"));
+ output.innerHTML=tests.map(t=>'<div class="test '+(t.condition?'pass':'fail')+'">'+(t.condition?'PASS':'FAIL')+' — '+t.name+(t.detail?' <code>'+t.detail+'</code>':'')+'</div>').join('');
+ const passed=tests.filter(t=>t.condition).length;document.getElementById("summary").textContent=passed+" / "+tests.length+" passed";
+ document.title=(passed===tests.length?"PASS":"FAIL")+" — Research Integrity Tests";
+ window.__TEST_RESULTS__={passed,total:tests.length,tests};
+})().catch(error=>{document.getElementById("summary").textContent="Test runner failed: "+error.message;document.title="FAIL — Research Integrity Tests"});
+</script>
+</body>
+</html>

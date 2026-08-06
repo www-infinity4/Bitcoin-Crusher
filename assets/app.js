@@ -240,7 +240,7 @@
     const preview = $("researchPreview");
     const meta    = $("researchPanelMeta");
     if (!panel || !preview || !article) return;
-    meta.textContent = `IF: ${article.impactFactor} · ${(article.domains || []).slice(0, 2).join(", ").replace(/_/g, " ")}`;
+    meta.textContent = `${article.evidenceStatus || "pending"} · ${(article.sources || []).length} real source${(article.sources || []).length === 1 ? "" : "s"}`;
     preview.innerHTML = `
       <div class="res-title">${escHtml(article.title)}</div>
       <div class="res-meta">
@@ -277,7 +277,7 @@
       <div class="res-meta-big">
         <span>👥 ${escHtml((article.authors || []).join(", "))}</span>
         <span>📰 ${escHtml(article.journal)} ${article.year}</span>
-        <span>IF: ${article.impactFactor}</span>
+        <span>Evidence: ${escHtml(article.evidenceStatus || "pending")}</span>\n        <span>Sources: ${(article.sources || []).length}</span>
         <span>DOI: ${escHtml(article.doi)}</span>
         <span>Spin #${article.spinNumber} · Score: ${article.tokenValue}</span>
         ${article.searchEnriched ? '<span class="res-badge enriched">🌐 Search Enriched</span>' : ""}
@@ -461,22 +461,23 @@
     // Attach article to spin data for commit
     if (article) spinData.researchArticle = article;
 
-    // 2. Commit to GitHub
-    const commitInfo = await commitSpinRecord(spinData);
-
-    // 3. Enrich article with search (background, non-blocking)
+    // 2. Retrieve and catalog real scholarly records before saving.
     if (article) {
-      window.RESEARCH.enrichWithSearch(article).then((enriched) => {
-        lastArticle = enriched;
-        renderResearchPreview(enriched);
-        log(`�� Research enriched with DDG + archive data.`, "ok");
-        // Update the history record's article too
-        if (history.length > 0) history[0].article = enriched;
-      }).catch(() => {});
+      try {
+        log("🌐 Searching OpenAlex and Crossref for real sources…");
+        article = await window.RESEARCH.enrichWithSearch(article);
+        lastArticle = article;
+        spinData.researchArticle = article;
+        renderResearchPreview(article);
+        log(`✅ Research package cataloged: ${(article.sources || []).length} sources · SHA-256 ${article.hash || "unavailable"}`, "ok");
+      } catch (e) {
+        log(`⚠️ Source retrieval failed; saving a clearly labeled pending queue: ${e.message}`, "warn");
+      }
     }
 
+    // 3. Save only after the evidence package is finalized or labeled pending.
+    const commitInfo = await commitSpinRecord(spinData);
     addHistoryItem(spinData, commitInfo, article);
-
     // 4. Update auth stats if logged in
     const user = window.AUTH ? window.AUTH.currentUser() : null;
     if (user) {
@@ -561,10 +562,7 @@
       }
 
       if (!parts.length) {
-        // Fallback: generate a research snippet using our local vocab
-        const mockSpin = { symbolLabels: ["BTC", "STAR", "DIAM"], tier: "lose", score: 0, spinNumber: 0 };
-        const art = window.RESEARCH.generateResearchArticle(mockSpin);
-        parts.push(`I could not find live search results for "<em>${escHtml(rawInput)}</em>", but here is a synthesised research perspective:<br><br>${escHtml(art.abstract)}`);
+        parts.push(`No live source summary was returned for "<em>${escHtml(rawInput)}</em>". No answer was invented. Try narrower keywords or open the <a class="chat-link" href="research-workspace.html">full research workspace</a> to search OpenAlex and Crossref.`);
       }
 
       responseHtml = parts.join("<br>");
