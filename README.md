@@ -21,11 +21,11 @@ The workspace currently:
 
 See [RESEARCH_SYSTEM.md](RESEARCH_SYSTEM.md) for the integrity rules, workflow, data model, and next build stages.
 
-## Important legacy status
+## Research engine status
 
-The slot-machine interface on this branch contains an older random article generator in `assets/research.js`. It can invent realistic-looking authors, journals, DOIs, methods, percentages, and conclusions. That legacy output is not real research and must not be presented as verified scholarship.
+The older random article generator has been removed from `assets/research.js`. The main slot-machine flow now creates a clearly labeled pending research queue, retrieves real OpenAlex and Crossref records, hashes the finalized evidence package, catalogs it locally, and saves it with the spin record when repository saving is configured.
 
-The new source-first workspace is the replacement path. The next implementation stage is to connect its real source records and catalog schema to the main Bitcoin Crusher interface, then remove the fabricated article path.
+No invented author, journal, DOI, experiment, percentage, or conclusion is used as research evidence.
 
 ## Defensive security research
 
