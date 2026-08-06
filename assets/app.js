@@ -52,6 +52,8 @@
   const histCountEl = $("histCount");
   const winOverlay  = $("winOverlay");
   const lever       = $("lever");
+  const researchIdeaEl = $("researchIdea");
+  const researchIdeaStatusEl = $("researchIdeaStatus");
 
   /* ------------------------------------------------------------------
      WEIGHTED RANDOM SYMBOL PICK
@@ -240,7 +242,7 @@
     const preview = $("researchPreview");
     const meta    = $("researchPanelMeta");
     if (!panel || !preview || !article) return;
-    meta.textContent = `${article.evidenceStatus || "pending"} · ${(article.sources || []).length} real source${(article.sources || []).length === 1 ? "" : "s"}`;
+    meta.textContent = `${article.tokenId || "token pending"} · ${article.evidenceStatus || "pending"} · ${(article.sources || []).length} real source${(article.sources || []).length === 1 ? "" : "s"}`;
     preview.innerHTML = `
       <div class="res-title">${escHtml(article.title)}</div>
       <div class="res-meta">
@@ -393,6 +395,21 @@
   ------------------------------------------------------------------ */
   async function spin() {
     if (isSpinning) return;
+    const userResearchInput = researchIdeaEl ? researchIdeaEl.value.trim() : "";
+    if (!userResearchInput) {
+      resultText.textContent = "Enter YOUR IDEA OR SEARCH TOPIC before spinning.";
+      if (researchIdeaStatusEl) {
+        researchIdeaStatusEl.textContent = "Research words are required so the token has a real subject.";
+        researchIdeaStatusEl.className = "auth-msg err";
+      }
+      if (researchIdeaEl) researchIdeaEl.focus();
+      log("⚠️ Enter your own research words before spinning.", "warn");
+      return;
+    }
+    if (researchIdeaStatusEl) {
+      researchIdeaStatusEl.textContent = "Input captured. The spin will research and tokenize these words.";
+      researchIdeaStatusEl.className = "auth-msg ok";
+    }
     isSpinning = true;
     spinBtn.disabled = true;
 
@@ -437,6 +454,7 @@
       symbols: finalSymbols.map((s) => s.emoji),
       symbolLabels: finalSymbols.map((s) => s.label),
       symbolValues: finalSymbols.map((s) => s.value),
+      userResearchInput,
       result: evalResult.label,
       tier: evalResult.tier,
       score: evalResult.score,
@@ -469,7 +487,7 @@
         lastArticle = article;
         spinData.researchArticle = article;
         renderResearchPreview(article);
-        log(`✅ Research package cataloged: ${(article.sources || []).length} sources · SHA-256 ${article.hash || "unavailable"}`, "ok");
+        log(`✅ Research token ${article.tokenId || "pending"}: ${(article.sources || []).length} sources · SHA-256 ${article.hash || "unavailable"}`, "ok");
       } catch (e) {
         log(`⚠️ Source retrieval failed; saving a clearly labeled pending queue: ${e.message}`, "warn");
       }
@@ -489,6 +507,9 @@
           tier: spinData.tier,
           score: spinData.score,
           title: article.title,
+          userInput: article.userInput,
+          tokenId: article.tokenId,
+          hash: article.hash,
           doi: article.doi,
         });
       }
