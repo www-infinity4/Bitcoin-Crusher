@@ -239,6 +239,16 @@ window.RESEARCH = (() => {
       sources: enriched.sources,
     });
     enriched.tokenId = "research-" + enriched.hash.slice(0, 16);
+    if (window.TOKEN_GRAPH) {
+      const node = window.TOKEN_GRAPH.registerBrief(enriched);
+      if (node) {
+        enriched.tokenNumber = node.tokenNumber;
+        enriched.tokenValue = node.tokenValue;
+        enriched.tokenColor = node.tokenColor;
+        enriched.tokenDateTime = node.tokenDateTime;
+        enriched.knowledgeStage = node.stage;
+      }
+    }
     catalogBrief(enriched);
     return enriched;
   }
