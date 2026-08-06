@@ -35,7 +35,6 @@ An API result is a discovery record, not proof that every conclusion in a paper 
 
 ## Next build stages
 
-- Replace the legacy random article generator inside the slot-machine flow.
 - Add full-text review checkboxes and page/section notes.
 - Add repository-backed catalog commits through a protected server endpoint.
 - Add topic collections, tags, related-source links, and catalog search.
