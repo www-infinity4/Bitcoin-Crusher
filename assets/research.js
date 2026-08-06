@@ -36,9 +36,10 @@ window.RESEARCH = (() => {
   }
 
   function termsForSpin(spinData) {
+    const userInput = clean(spinData.userResearchInput || "");
     const labels = spinData.symbolLabels || [];
-    const terms = labels.flatMap((label) => DOMAIN_TERMS[label] || []);
-    return unique(terms).slice(0, 8);
+    const symbolTerms = labels.flatMap((label) => DOMAIN_TERMS[label] || []);
+    return unique([userInput, ...symbolTerms]).slice(0, 8);
   }
 
   function abstractFromIndex(index) {
@@ -133,11 +134,13 @@ window.RESEARCH = (() => {
   }
 
   function pendingBrief(spinData) {
+    const userInput = clean(spinData.userResearchInput || "");
     const keywords = termsForSpin(spinData);
-    const topic = keywords.slice(0, 4).join(", ") || "interdisciplinary research";
+    const topic = userInput || keywords.slice(0, 4).join(", ") || "interdisciplinary research";
     return {
       schema: "infinity-research-brief/v1",
-      title: "Research queue: " + topic,
+      userInput,
+      title: "Research token: " + topic.slice(0, 120),
       authors: [],
       journal: "Source discovery pending",
       year: new Date().getFullYear(),
@@ -229,11 +232,13 @@ window.RESEARCH = (() => {
     }
     enriched.hash = await sha256({
       schema: enriched.schema,
+      userInput: enriched.userInput,
       keywords: enriched.keywords,
       generatedAt: enriched.generatedAt,
       spinNumber: enriched.spinNumber,
       sources: enriched.sources,
     });
+    enriched.tokenId = "research-" + enriched.hash.slice(0, 16);
     catalogBrief(enriched);
     return enriched;
   }
