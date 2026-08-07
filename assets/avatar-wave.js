@@ -201,7 +201,11 @@
     preview();
   }
   function mark(root) {
-    (root || document).querySelectorAll(selector).forEach((el) => {
+    const scope = root || document;
+    const targets = [];
+    if (scope.matches && scope.matches(selector)) targets.push(scope);
+    if (scope.querySelectorAll) targets.push(...scope.querySelectorAll(selector));
+    targets.forEach((el) => {
       if (el.dataset.avatarWaveMarked === "true") return;
       const info = editable(el);
       if (!info) return;
