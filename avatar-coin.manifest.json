@@ -1,0 +1,27 @@
+{
+  "schema": "c13b0/avatar-coin-site/v1",
+  "siteId": "bitcoin-crusher",
+  "siteName": "Bitcoin Crusher",
+  "marker": {
+    "symbol": "₿",
+    "label": "Bitcoin Avatar Coin",
+    "coverage": "every safely editable page element"
+  },
+  "portal": {
+    "module": "assets/avatar-wave.js",
+    "recordSchema": "c13b0/avatar-wave-version/v1",
+    "localChain": true,
+    "sharedPublishing": false
+  },
+  "opportunities": [
+    "titles",
+    "research text",
+    "instructions",
+    "buttons",
+    "labels",
+    "lyrics",
+    "page design",
+    "generated content"
+  ],
+  "principle": "More complete contributions create more attributed edit points, discovery paths, remixes, installs and adoption opportunities."
+}
