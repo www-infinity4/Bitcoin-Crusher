@@ -1,27 +1,41 @@
 {
-  "schema": "c13b0/avatar-coin-site/v1",
+  "schema": "infinity/avatar-coin-site/v2",
   "siteId": "bitcoin-crusher",
   "siteName": "Bitcoin Crusher",
   "marker": {
     "symbol": "₿",
     "label": "Bitcoin Avatar Coin",
-    "coverage": "every safely editable page element"
+    "coverage": "intentional edit anchors only",
+    "maxAutomaticMarkers": 8
   },
   "portal": {
     "module": "assets/avatar-wave.js",
-    "recordSchema": "c13b0/avatar-wave-version/v1",
-    "localChain": true,
-    "sharedPublishing": false
+    "recordSchema": "infinity/avatar-coin-creation/v2",
+    "localDraftCache": true,
+    "canonicalLedger": "www-infinity4/INFINITY/avatar-coin",
+    "sharedPublishing": true
   },
-  "opportunities": [
-    "titles",
-    "research text",
-    "instructions",
-    "buttons",
-    "labels",
-    "lyrics",
-    "page design",
-    "generated content"
+  "automaticAnchors": [
+    ".topbar-name",
+    ".hero-title",
+    ".machine-title-text",
+    ".panel-title",
+    "[data-avatar-anchor]"
   ],
-  "principle": "More complete contributions create more attributed edit points, discovery paths, remixes, installs and adoption opportunities."
+  "excludedByDefault": [
+    "p",
+    "label",
+    "footer",
+    ".result-text",
+    ".chat-bubble",
+    ".ham-link",
+    ".ham-section-label"
+  ],
+  "allocation": {
+    "creatorWalletDailyMax": 10,
+    "overflow": "PROJECT_MATCH_POOL",
+    "creatorAttributionPersists": true,
+    "purchaseChangesHolderNotCreator": true
+  },
+  "principle": "The Avatar marker is a deliberate portal into a creation chain, not decoration beside every editable sentence."
 }
