@@ -1,0 +1,12 @@
+{
+  "wallet_protocol": "infinity-wallet-v1",
+  "ledger_authority": "www-infinity4/INFINITY",
+  "source_key": "BITCOIN_CRUSHER",
+  "user_daily_allocation_limit": 10,
+  "overflow_owner": "INFINITY_SYSTEM_POOL",
+  "primary_action": "SPIN",
+  "optional_research_input": true,
+  "local_balance_authoritative": false,
+  "research_mode": "NOVELTY_TWO_STREAM",
+  "research_integrity": "REAL_SOURCES_ONLY"
+}
