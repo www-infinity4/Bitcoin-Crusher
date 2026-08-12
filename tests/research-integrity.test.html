@@ -27,7 +27,12 @@ const crossrefFixture={message:{items:[{
  DOI:"10.1000/example.2",title:["Lifecycle Boundaries for Computing Infrastructure"],author:[{given:"Ben",family:"Check"}],
  published:{"date-parts":[[2024]]},"container-title":["Fixture Methods"],URL:"https://doi.org/10.1000/example.2","is-referenced-by-count":5,type:"journal-article"
 }]}};
-window.fetch=async url=>({ok:true,status:200,json:async()=>String(url).includes("openalex")?openAlexFixture:crossrefFixture});
+window.fetch=async url=>{
+ const value=String(url);
+ if(value.includes("127.0.0.1:11435/v1/reason"))return{ok:true,status:200,json:async()=>({schema:"infinity/reason-result/v1",role:"REASONER",model:"fake-local-gemma",output:"Cautious local synthesis.",evidenceState:"INFERRED"})};
+ if(value.includes("127.0.0.1:11435/v1/tools"))return{ok:true,status:200,json:async()=>({proposal:{name:"research.expand_token",arguments:{}},executed:false,requiresApplicationValidation:true})};
+ return{ok:true,status:200,json:async()=>value.includes("openalex")?openAlexFixture:crossrefFixture};
+};
 </script>
 <script src="../assets/research.js"></script>
 <script>
@@ -47,6 +52,13 @@ window.fetch=async url=>({ok:true,status:200,json:async()=>String(url).includes(
  test("References contain real fixture DOIs",enriched.references.some(x=>x.includes("10.1000/example.1"))&&enriched.references.some(x=>x.includes("10.1000/example.2")));
  test("Abstract-level evidence is labeled provisional",enriched.fullTextsReviewed===0&&/full-text review/i.test(enriched.discussion));
  test("Research package has a SHA-256 digest",/^[a-f0-9]{64}$/.test(enriched.hash),enriched.hash);
+ test("Shared research record keeps model prose inferred",enriched.researchContract.evidenceLevel==="INFERRED"&&enriched.runtime.synthesis.evidenceLevel==="INFERRED");
+ test("Captured external metadata retains source URLs",enriched.researchContract.sourceEvidence.every(x=>x.evidenceLevel==="EXTERNALLY_VERIFIED"&&x.url));
+ test("Local Gemma runtime uses the shared typed contract",enriched.runtime.status==="READY"&&enriched.runtime.synthesis.model==="fake-local-gemma");
+ test("Tool router proposes without executing",enriched.runtime.toolProposal.name==="research.expand_token"&&enriched.runtime.toolProposal.executed===false);
+ test("Novelty contract records canonical SHA-256 hashes",["queryHash","sourceSetHash","articleHash","tokenLineageHash","userPathHash"].every(key=>/^[a-f0-9]{64}$/.test(enriched.novelty[key])));
+ const repeated=await window.RESEARCH.enrichWithSearch(pending);
+ test("Repeated research is marked duplicate",repeated.novelty.status==="DUPLICATE"&&repeated.novelty.duplicateOf===enriched.hash,repeated.novelty.matchedOn);
  test("No game score is presented as Bitcoin revenue",enriched.simulatedGameScore===25&&!Object.prototype.hasOwnProperty.call(enriched,"bitcoinRevenue"));
  output.innerHTML=tests.map(t=>'<div class="test '+(t.condition?'pass':'fail')+'">'+(t.condition?'PASS':'FAIL')+' — '+t.name+(t.detail?' <code>'+t.detail+'</code>':'')+'</div>').join('');
  const passed=tests.filter(t=>t.condition).length;document.getElementById("summary").textContent=passed+" / "+tests.length+" passed";
