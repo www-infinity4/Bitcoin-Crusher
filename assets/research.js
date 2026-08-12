@@ -35,6 +35,70 @@ window.RESEARCH = (() => {
     return controller.signal;
   }
 
+  function stableValue(value) {
+    if (Array.isArray(value)) return value.map(stableValue);
+    if (value && typeof value === "object") {
+      return Object.keys(value).sort().reduce((result, key) => {
+        result[key] = stableValue(value[key]);
+        return result;
+      }, {});
+    }
+    return value;
+  }
+
+  function runtimeBaseUrl() {
+    return clean(window.INFINITY_AI_BASE_URL || "http://127.0.0.1:11435").replace(/\/$/, "");
+  }
+
+  async function runtimePost(path, payload) {
+    const response = await fetch(runtimeBaseUrl() + path, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+      signal: makeAbortSignal(1800),
+    });
+    if (!response.ok) throw new Error("Infinity AI " + response.status);
+    return response.json();
+  }
+
+  async function consultRuntime(article, query) {
+    try {
+      const context = {
+        streamType: "PROJECT_RESEARCH",
+        evidenceLevel: "INFERRED",
+        query,
+        sources: article.sources.map((source) => ({
+          title: source.title, provider: source.provider, url: source.url,
+          fullTextReviewed: false,
+        })),
+      };
+      const reasoned = await runtimePost("/v1/reason", {
+        input: "Synthesize a cautious next-step research note from the captured source metadata. Do not claim full-text review or external verification for model prose.",
+        context,
+      });
+      if (reasoned.schema !== "infinity/reason-result/v1" || reasoned.role !== "REASONER" ||
+          reasoned.evidenceState !== "INFERRED" || typeof reasoned.output !== "string") {
+        throw new Error("invalid REASONER contract");
+      }
+      const routed = await runtimePost("/v1/tools", {
+        input: "Propose the next research action for: " + query,
+        tools: [
+          { name: "research.search", description: "Propose another source search" },
+          { name: "research.expand_token", description: "Propose deeper token research" },
+        ],
+        context,
+      });
+      if (routed.executed !== false || !routed.proposal) throw new Error("invalid TOOL_ROUTER contract");
+      return {
+        status: "READY",
+        synthesis: { text: reasoned.output, evidenceLevel: "INFERRED", model: reasoned.model || "local" },
+        toolProposal: Object.assign({}, routed.proposal, { executed: false }),
+      };
+    } catch (_) {
+      return { status: "OFFLINE_FALLBACK", synthesis: null, toolProposal: null };
+    }
+  }
+
   function termsForSpin(spinData) {
     const userInput = clean(spinData.userResearchInput || "");
     const labels = spinData.symbolLabels || [];
@@ -172,9 +236,57 @@ window.RESEARCH = (() => {
 
   async function sha256(value) {
     if (!crypto || !crypto.subtle) return "unavailable";
-    const bytes = new TextEncoder().encode(JSON.stringify(value));
+    const bytes = new TextEncoder().encode(JSON.stringify(stableValue(value)));
     const digest = await crypto.subtle.digest("SHA-256", bytes);
     return [...new Uint8Array(digest)].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+  }
+
+  async function noveltyHashes(article, query) {
+    const sourceSet = article.sources.map((source) => ({
+      provider: clean(source.provider).toLowerCase(),
+      id: clean(source.doi || source.id || source.url).toLowerCase(),
+    })).sort((a, b) => JSON.stringify(a).localeCompare(JSON.stringify(b)));
+    const articleRecord = {
+      schema: article.schema,
+      query: clean(query).toLowerCase(),
+      title: article.title,
+      keywords: article.keywords,
+      sources: sourceSet,
+      abstract: article.abstract,
+      methods: article.methods,
+      results: article.results,
+      conclusion: article.conclusion,
+    };
+    const userPath = [clean(article.userInput).toLowerCase(), ...(article.keywords || []).map((item) => clean(item).toLowerCase())];
+    return {
+      schema: "infinity/research-novelty/v1",
+      queryHash: await sha256(clean(query).toLowerCase()),
+      sourceSetHash: sourceSet.length ? await sha256(sourceSet) : null,
+      articleHash: await sha256(articleRecord),
+      tokenLineageHash: await sha256([article.spinNumber || 0, article.tokenId || null]),
+      userPathHash: await sha256(userPath),
+      status: "UNIQUE",
+      duplicateOf: null,
+      matchedOn: null,
+    };
+  }
+
+  function markDuplicate(novelty) {
+    try {
+      const catalog = JSON.parse(localStorage.getItem("infinityResearchCatalog") || "[]");
+      const fields = ["queryHash", "sourceSetHash", "articleHash"];
+      const match = catalog.find((item) => item.novelty && fields.some((field) =>
+        novelty[field] && item.novelty[field] === novelty[field]
+      ));
+      if (match) {
+        novelty.status = "DUPLICATE";
+        novelty.duplicateOf = match.hash;
+        novelty.matchedOn = fields.find((field) => novelty[field] && match.novelty[field] === novelty[field]);
+      }
+    } catch (_) {
+      // Novelty comparison is optional when storage is unavailable.
+    }
+    return novelty;
   }
 
   function catalogBrief(brief) {
@@ -184,6 +296,7 @@ window.RESEARCH = (() => {
       if (!catalog.some((item) => item.hash === brief.hash)) {
         catalog.unshift({
           hash: brief.hash,
+          novelty: brief.novelty,
           title: brief.title,
           createdAt: brief.generatedAt,
           sourceCount: brief.sources.length,
@@ -230,6 +343,20 @@ window.RESEARCH = (() => {
         url: source.url,
       }));
     }
+    enriched.researchContract = {
+      schema: "infinity/research-record/v1",
+      streamType: "PROJECT_RESEARCH",
+      evidenceLevel: "INFERRED",
+      sourceEvidence: sources.map((source) => ({
+        title: source.title,
+        provider: source.provider,
+        url: source.url,
+        evidenceLevel: source.url ? "EXTERNALLY_VERIFIED" : "OBSERVED",
+        fullTextReviewed: false,
+      })),
+    };
+    enriched.runtime = await consultRuntime(enriched, query);
+    enriched.novelty = markDuplicate(await noveltyHashes(enriched, query));
     enriched.hash = await sha256({
       schema: enriched.schema,
       userInput: enriched.userInput,
@@ -237,6 +364,7 @@ window.RESEARCH = (() => {
       generatedAt: enriched.generatedAt,
       spinNumber: enriched.spinNumber,
       sources: enriched.sources,
+      novelty: enriched.novelty,
     });
     enriched.tokenId = "research-" + enriched.hash.slice(0, 16);
     if (window.TOKEN_GRAPH) {
