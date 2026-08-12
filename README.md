@@ -39,3 +39,14 @@ The main branch also contains [AIR_GAP_SECURITY_RESEARCH_QUEUE.md](AIR_GAP_SECUR
 - No invented citations or findings.
 - Local-first operation with no OAuth or package installation required.
 - Repository-backed cataloging added only through a protected write path.
+
+
+## Public product identity
+
+- **Product name:** Bitcoin Crusher
+- **Repository address:** `www-infinity4/Bitcoin-Crusher`
+- **Suggested domain:** `BitcoinCrusher.com`
+- **Domain status:** suggestion only; ownership, DNS, TLS, and deployment are not yet verified
+- **Product description:** Turn a question into sourced research, a durable hashed record, and a growing knowledge network.
+
+The repository address remains stable even when the public product name, tagline, domain, navigation, and visual presentation are improved.
