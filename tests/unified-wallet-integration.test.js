@@ -1,0 +1,12 @@
+'use strict';
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const app = fs.readFileSync('assets/app.js', 'utf8');
+const adapter = fs.readFileSync('assets/infinity-wallet-integration.js', 'utf8');
+const manifest = JSON.parse(fs.readFileSync('infinity-wallet.json', 'utf8'));
+assert.match(app, /bitcoincrusher:research-token/);
+assert.match(adapter, /BITCOIN_CRUSHER_COIN/);
+assert.match(adapter, /used >= 10/);
+assert.equal(manifest.shared_storage_key, 'infinity_unified_wallet_v1');
+assert.equal(manifest.collectible_transfer_rule, 'TRANSFER_COMPLETE_TOKEN_WITH_PROVENANCE');
+console.log('Bitcoin Crusher unified wallet adapter: ok');

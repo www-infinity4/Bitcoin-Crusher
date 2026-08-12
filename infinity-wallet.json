@@ -7,6 +7,10 @@
   "primary_action": "SPIN",
   "optional_research_input": true,
   "local_balance_authoritative": false,
+  "shared_wallet_page": "https://www-infinity4.github.io/Mint-For-Infinity/unified-wallet.html",
+  "shared_wallet_engine": "https://www-infinity4.github.io/Mint-For-Infinity/unified-wallet.js",
+  "shared_storage_key": "infinity_unified_wallet_v1",
+  "collectible_transfer_rule": "TRANSFER_COMPLETE_TOKEN_WITH_PROVENANCE",
   "research_mode": "NOVELTY_TWO_STREAM",
   "research_integrity": "REAL_SOURCES_ONLY"
 }
