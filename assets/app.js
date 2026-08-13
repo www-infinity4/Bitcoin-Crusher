@@ -496,6 +496,9 @@
     // 3. Save only after the evidence package is finalized or labeled pending.
     const commitInfo = await commitSpinRecord(spinData);
     addHistoryItem(spinData, commitInfo, article);
+    if (article) window.dispatchEvent(new CustomEvent('bitcoincrusher:research-token', { detail: {
+      tokenId: article.tokenId, hash: article.hash, spinNumber: spinData.spinNumber, timestamp: spinData.timestamp,
+    } }));
     // 4. Update auth stats if logged in
     const user = window.AUTH ? window.AUTH.currentUser() : null;
     if (user) {
