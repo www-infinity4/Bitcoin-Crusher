@@ -497,7 +497,16 @@
     const commitInfo = await commitSpinRecord(spinData);
     addHistoryItem(spinData, commitInfo, article);
     if (article) window.dispatchEvent(new CustomEvent('bitcoincrusher:research-token', { detail: {
-      tokenId: article.tokenId, hash: article.hash, spinNumber: spinData.spinNumber, timestamp: spinData.timestamp,
+      tokenId: article.tokenId,
+      hash: article.hash,
+      spinNumber: spinData.spinNumber,
+      timestamp: spinData.timestamp,
+      title: article.title,
+      userInput: article.userInput,
+      evidenceStatus: article.evidenceStatus,
+      doi: article.doi,
+      sources: article.sources || [],
+      article,
     } }));
     // 4. Update auth stats if logged in
     const user = window.AUTH ? window.AUTH.currentUser() : null;
