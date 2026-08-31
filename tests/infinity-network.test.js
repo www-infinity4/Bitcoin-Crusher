@@ -13,6 +13,7 @@ function setup() {
   };
 
   class Wallet {
+    load() { return this.state; }
     constructor() {
       this.state = { currentWalletId: null, wallets: {}, events: [], tokens: {} };
     }

@@ -11,6 +11,8 @@
   const language = window.InfinityAIKernel ? new window.InfinityAIKernel.InfinityLanguageEngine() : null;
 
   function current() {
+    wallet.state = wallet.load();
+    wallet.processedEventIds = new Set(wallet.state.events.map(event => event.eventId));
     return wallet.state.currentWalletId && wallet.state.wallets[wallet.state.currentWalletId];
   }
 
