@@ -123,7 +123,7 @@
   var notes=clean($("researchIdea").value).slice(0,600);
   if(terms.length!==4){labelReward("Select four different research terms first.");return}
   var query=suggestions.query(notes);
-  var spinData={id:randomId(),sequence:++state.activeSpin,spinNumber:++state.spinCount,timestamp:new Date().toISOString(),terms:terms,userResearchInput:query,notes:notes,symbolLabels:[],score:0};
+  var spinData={id:randomId(),sequence:++state.activeSpin,spinNumber:++state.spinCount,timestamp:new Date().toISOString(),terms:terms,researchTerms:terms,userResearchInput:query,notes:notes,symbolLabels:[],score:0};
   state.spinning=true;$("spinBtn").disabled=true;
   $("resultText").textContent="Connecting four research subjects…";
   $("researchIdeaStatus").textContent="Four terms selected; manual context preserved in the research token.";
