@@ -46,56 +46,53 @@ window.RESEARCH = (() => {
     return value;
   }
 
+
   function runtimeBaseUrl() {
-    return clean(window.INFINITY_AI_BASE_URL || "http://127.0.0.1:11435").replace(/\/$/, "");
+    // A browser on the public site cannot reach 127.0.0.1 on its own phone.
+    return clean(window.INFINITY_AI_BASE_URL || "https://infinity-rogers.marvaseater.workers.dev").replace(/\/$/, "");
   }
 
   async function runtimePost(path, payload) {
     const response = await fetch(runtimeBaseUrl() + path, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { "Content-Type": "application/json", "Accept": "application/json" },
       body: JSON.stringify(payload),
-      signal: makeAbortSignal(1800),
+      signal: makeAbortSignal(23000),
     });
-    if (!response.ok) throw new Error("Infinity AI " + response.status);
-    return response.json();
+    const json = await response.json().catch(() => ({}));
+    if (!response.ok || json.ok === false) throw new Error("Research AI unavailable (" + response.status + ")");
+    return json;
   }
 
   async function consultRuntime(article, query) {
+    if (!article.sources.length) return { status: "NO_SOURCES", synthesis: null, toolProposal: null };
     try {
-      const context = {
-        streamType: "PROJECT_RESEARCH",
-        evidenceLevel: "INFERRED",
-        query,
-        sources: article.sources.map((source) => ({
-          title: source.title, provider: source.provider, url: source.url,
-          fullTextReviewed: false,
-        })),
-      };
-      const reasoned = await runtimePost("/v1/reason", {
-        input: "Synthesize a cautious next-step research note from the captured source metadata. Do not claim full-text review or external verification for model prose.",
-        context,
+      const readings=article.sources.slice(0,5).map(source=>({
+        title:source.title,provider:source.provider,url:source.url,
+        abstract:clean(source.abstract).slice(0,1100),fullTextReviewed:false
+      }));
+      const prompt=[
+        "You are the Bitcoin Crusher research assistant. Synthesize an ORIGINAL, useful evidence-mapping note from the supplied retrieved academic-index metadata and abstracts.",
+        "Research question: "+query,
+        "Describe agreements, differences, research gaps, and 2-3 specific next searches. Distinguish facts from hypotheses. Cite the indexed titles and URLs where supported.",
+        "Do not invent papers, prices, scientific outcomes, or discoveries. An abstract is not a full peer-reviewed result inspection. Do not claim to have reviewed full papers.",
+        "Search evidence: "+JSON.stringify(readings)
+      ].join("\n");
+      const response=await runtimePost("/v1/chat",{
+        input:prompt,
+        context:{application:"QuantaPhi",task:"crusher-research-synthesis",requireCloudflare:true,
+          verified_context:{query,sourceCount:readings.length,fullTextsReviewed:0}}
       });
-      if (reasoned.schema !== "infinity/reason-result/v1" || reasoned.role !== "REASONER" ||
-          reasoned.evidenceState !== "INFERRED" || typeof reasoned.output !== "string") {
-        throw new Error("invalid REASONER contract");
-      }
-      const routed = await runtimePost("/v1/tools", {
-        input: "Propose the next research action for: " + query,
-        tools: [
-          { name: "research.search", description: "Propose another source search" },
-          { name: "research.expand_token", description: "Propose deeper token research" },
-        ],
-        context,
-      });
-      if (routed.executed !== false || !routed.proposal) throw new Error("invalid TOOL_ROUTER contract");
+      const synthesis=clean(response.output_text||response.output||response.answer);
+      if(!synthesis)throw new Error("empty AI result");
       return {
         status: "READY",
-        synthesis: { text: reasoned.output, evidenceLevel: "INFERRED", model: reasoned.model || "local" },
-        toolProposal: Object.assign({}, routed.proposal, { executed: false }),
+        synthesis: { text:synthesis, evidenceLevel:"INFERRED", model:response.model||"Cloudflare AI" },
+        toolProposal: { name:"research.search", arguments:{query:query+" related findings"},executed:false }
       };
-    } catch (_) {
-      return { status: "OFFLINE_FALLBACK", synthesis: null, toolProposal: null };
+    } catch (error) {
+      console.warn("Research synthesis deferred; the retrieved scholarly sources remain available.", error);
+      return { status: "OFFLINE_FALLBACK", synthesis:null, toolProposal:null };
     }
   }
 
@@ -311,8 +308,15 @@ window.RESEARCH = (() => {
   }
 
   async function enrichWithSearch(article) {
-    const query = (article.keywords || []).slice(0, 6).join(" ");
-    const sources = query ? await searchScholarly(query, 12) : [];
+    const exactQuestion=clean(article.userInput);
+    const query=exactQuestion || (article.keywords || []).slice(0, 2).join(" ");
+    let sources=query?await searchScholarly(query,12):[];
+    // Keep the user's question primary. Unrelated reel-symbol domains never
+    // override it or get presented as factual connections.
+    if(!sources.length&&exactQuestion){
+      const simpler=exactQuestion.split(/[,;.!?]/)[0].trim().split(/\s+/).slice(0,8).join(" ");
+      if(simpler&&simpler!==query)sources=await searchScholarly(simpler,12);
+    }
     const primary = sources[0] || null;
     const abstractSources = sources.filter((source) => source.abstract);
     const enriched = Object.assign({}, article, {
@@ -351,7 +355,7 @@ window.RESEARCH = (() => {
         title: source.title,
         provider: source.provider,
         url: source.url,
-        evidenceLevel: source.url ? "EXTERNALLY_VERIFIED" : "OBSERVED",
+        evidenceLevel: source.url ? "INDEXED_SOURCE" : "OBSERVED",
         fullTextReviewed: false,
       })),
     };
