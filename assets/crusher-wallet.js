@@ -48,9 +48,12 @@
   if(!connected()){note(read().length+" pending spin credit(s) · connect the shared wallet");return false}
   running=true;
   try{
-    var pending=read(),user=account();
-    for(var item of pending){
-      if(item.owner&&user&&item.owner!==user)continue; // Never reassign offline rewards from a different signed-in account.
+    var user=account(),attempted=new Set();
+    // Include new spins queued while a previous spin is awaiting Cloudflare.
+    for(;;){
+      var item=read().find(function(x){return !attempted.has(x.id)&&(!x.owner||(user&&x.owner===user));});
+      if(!item)break;
+      attempted.add(item.id);
       if(!item.quantaConfirmed){
         var data=await request("/v1/quants/crusher-spins",{method:"POST",body:{spin_id:item.id,query:item.query,terms:item.terms,research_hash:item.researchHash}});
         reconcile(data);
@@ -60,7 +63,9 @@
       if(!item.starquestConfirmed){
         var credited=await starQuestSpin(item);
         if(credited.state){
-          global.ControlPhi?.refreshCloudWallet?.();
+          var starBalance=Number(credited.state.starCoins||0)+Number(credited.state.pendingShareCredits||0)/10;
+          global.ControlPhi?.importLegacyStarCoinBalance?.(starBalance,"starquest-crusher-spin");
+          void global.ControlPhi?.refreshCloudWallet?.();
         }
         item.starquestConfirmed=true;
         save(read().map(function(x){return x.id===item.id?item:x}));
@@ -70,7 +75,7 @@
         note("Confirmed +0.1 StarCoin in the unified wallet. Spin receipt synchronized to both ledgers.");
       }
     }
-    if(!pending.length)await state();
+    if(!attempted.size)await state();
     return true;
   }catch(error){
     note("Spin saved · StarCoin credit pending Cloudflare wallet confirmation.");
