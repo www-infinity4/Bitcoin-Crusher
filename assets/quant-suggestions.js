@@ -4,7 +4,7 @@
   var API = "https://quanta-phi-ledger.marvaseater.workers.dev";
   var STOP = new Set(("about after again against also among another because being between build built could different during every from have having into itself more most much only other over research search should since some that their there these this those through using very what when where which while will with would your").split(" "));
   var SEED = ["Hydrogen","Bitcoin","Copper","Silver","Resonance","Energy","Venus","Lithium","Magnetism","Robotics","Electricity","Asteroids","Geology","Quantum","Water","History","Metallurgy","Radiation","Plasma","Piano","Atmosphere","Chemistry","Biology","Gravity","Semiconductors","Fusion","Space","Materials","Electrons","Frequency","Research","Crystals"];
-  var pool = SEED.slice(), terms = [], buttonWords = [], sourceCount = 0;
+  var pool = SEED.slice(), terms = [], buttonWords = [], sourceCount = 0, served = new Set();
   var chooser = global.document.getElementById("suggestionButtons");
   var selected = global.document.getElementById("selectedTerms");
   var info = global.document.getElementById("quantSource");
@@ -33,15 +33,16 @@
     var sorted=[...weight.entries()].sort(function(a,b){return b[1]-a[1];}).map(function(entry){return entry[0][0].toUpperCase()+entry[0].slice(1);});
     var all=sorted.concat(SEED); var unique=new Set();
     pool=all.filter(function(word){var k=normalized(word);if(!k||unique.has(k))return false;unique.add(k);return true;});
+    served.clear();
     sourceCount=seen.size;
   }
   function pick(skip) {
     var forbidden=new Set((skip||[]).map(normalized));
-    var eligible=pool.filter(function(x){return !forbidden.has(normalized(x));});
+    var eligible=pool.filter(function(x){return !forbidden.has(normalized(x))&&!served.has(normalized(x));});
+    if(!eligible.length){served.clear();eligible=pool.filter(function(x){return !forbidden.has(normalized(x));});}
     if(!eligible.length)return "";
-    // Prefer the user's full Quant index while giving less frequent words a chance.
-    var top=Math.min(eligible.length,Math.max(18,Math.floor(eligible.length*.7)));
-    return eligible[Math.floor(Math.random()*top)];
+    var word=eligible[Math.floor(Math.random()*eligible.length)];
+    served.add(normalized(word));return word;
   }
   function fillSuggestions() {
     buttonWords=[];
@@ -107,9 +108,11 @@
     renderSelected();fillSuggestions();
     try{
       await global.QuantaCloudConnection?.ready;
-      var results=await Promise.all([getJSON("/v1/quants/history"),getJSON("/v1/quants/card-interactions")]);
-      extract(results[0],results[1]);fillSuggestions();
-      if(info)info.textContent=(sourceCount?sourceCount+" indexed Quants":"Saved Quant history")+" · "+(results[1].events||[]).length+" card interactions";
+      var results=await Promise.allSettled([getJSON("/v1/quants/history"),getJSON("/v1/quants/card-interactions")]);
+      if(results[0].status!=="fulfilled")throw Error("Quant history unavailable");
+      var history=results[0].value,interactions=results[1].status==="fulfilled"?results[1].value:{events:[]};
+      extract(history,interactions);fillSuggestions();
+      if(info)info.textContent=(sourceCount?sourceCount+" indexed searches scanned":"Saved Quant history")+" · "+(interactions.events||[]).length+" card interactions";
     }catch(_){
       // Only the on-device history is used if the user has no verified cloud identity.
       var local=[];
