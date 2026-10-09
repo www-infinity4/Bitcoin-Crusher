@@ -118,7 +118,7 @@
       var local=[];
       try{local=JSON.parse(global.localStorage.getItem("quantaPhiBuildHistoryV1")||"[]")||[];}catch(_){}
       if(Array.isArray(local)&&local.length){
-        extract({searches:local.map(function(x){return {search_id:x.search_id||x.id,query_text:x.query||x.title};})},tokens:[]},{events:[]});
+        extract({searches:local.map(function(x){return {search_id:x.search_id||x.id,query_text:x.query||x.title};}),tokens:[]},{events:[]});
         fillSuggestions();if(info)info.textContent=local.length+" locally saved Quants · cloud history not connected";
       }else if(info)info.textContent="Starter ideas · connect the shared wallet to use your Quants";
     }
