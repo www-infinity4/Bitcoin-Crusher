@@ -233,7 +233,15 @@
    var answer=clean(data.output_text||data.output||data.answer||data.response||"");
    if(!answer)throw Error("Writer returned no text");
    output.textContent=answer;
-   status.textContent=readings.length+" indexed source(s) · draft prepared · verify claims against original publications.";
+   if(article){
+    article.runtime=article.runtime&&typeof article.runtime==="object"?article.runtime:{};
+    article.runtime.synthesis={text:answer,evidenceLevel:readings.length?"INFERRED":"UNVERIFIED",model:data.model||"Cloudflare AI"};
+    state.latestArticle=article;
+    renderBrief(article);
+    const originalSpin=global.BitcoinCrusherResearchDirections?.current?.spinData;
+    if(originalSpin)global.BitcoinCrusherResearchDirections?.set?.(article,originalSpin);
+   }
+   status.textContent=readings.length+" indexed source(s) · draft expanded; collect again to update the saved research Quant.";
   }catch(error){
    status.textContent="Writer could not reach the AI service. The indexed research above remains available.";
    output.textContent="The research writer could not finish this request. Please try again; no invented article has been substituted.";
