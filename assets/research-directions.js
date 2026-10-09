@@ -18,7 +18,7 @@
   ["Opportunity Tracker","Live ideas and validation pipeline","Track research hypotheses, validation steps, project readiness and updates"],
   ["Builder Studio","Modular website toolkit and storefront prototype","Turn researched ideas into reusable builder cards, tools and product showcases"]
  ];
- let current=null, directions=[], activeId="";
+ let current=null, directions=[], activeId="", collectedIds=new Set(), aiAttempted=new Set();
  const el=id=>document.getElementById(id);
  const clean=(x,max=1000)=>String(x??"").replace(/\s+/g," ").trim().slice(0,max);
  function read(){try{const value=JSON.parse(localStorage.getItem(PENDING)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
@@ -117,14 +117,57 @@
  }
  function collect(){
   const packet=articlePacket();if(!packet){return}
+  collectedIds.add(packet.article_id);
   if(!queue(packet)){el("collectStatus").textContent="Device storage unavailable; research not collected.";return}
   el("collectStatus").textContent="Research Quant collected locally. Syncing article and directions to Builder Reserve…";
   void flush();
+ }
+ async function generateSpecificDirections(article,spinData){
+  const key=spinData.id;
+  if(aiAttempted.has(key)||!(article.sources||[]).length)return;
+  aiAttempted.add(key);
+  const terms=spinData.terms.slice(0,4);
+  const sourceEvidence=(article.sources||[]).slice(0,7).map(x=>({title:x.title,url:x.url,abstract:clean(x.abstract,550)}));
+  const instruction=[
+   "Create twelve genuinely distinct research-derived website directions, formatted as ONLY a JSON array of objects with keys type,title,body,indexedWords.",
+   "Each direction must propose a different useful business, research, learning, media, tool, or community website; no repeats, no empty generic labels.",
+   "Four research terms: "+JSON.stringify(terms),
+   "Indexed source records, which may be abstracts only: "+JSON.stringify(sourceEvidence),
+   "Never present a website idea as a proven discovery or market opportunity. No invented citations, results, prices, verified findings or full-text reading.",
+   "Each body explains practical features and what remains to validate; indexedWords should connect the four terms to this website."
+  ].join("\n");
+  try{
+   const response=await fetch("https://infinity-rogers.marvaseater.workers.dev/v1/chat",{
+    method:"POST",headers:{"content-type":"application/json","accept":"application/json"},
+    body:JSON.stringify({input:instruction,context:{application:"Builder Reserve",task:"research-quant-website-directions",requireCloudflare:true,verified_context:{query:terms.join(" "),sourceCount:sourceEvidence.length}}}),
+    signal:AbortSignal.timeout(19000)
+   });
+   if(!response.ok)throw Error("Directions writer unavailable");
+   const payload=await response.json();
+   let raw=payload.output_text||payload.output||payload.answer||payload.response||"";
+   if(typeof raw==="object"&&!Array.isArray(raw))raw=raw.output_text||raw.text||raw.answer||"";
+   const txt=String(raw),first=txt.indexOf("["),last=txt.lastIndexOf("]");
+   if(first<0||last<=first)throw Error("No direction array");
+   const rows=JSON.parse(txt.slice(first,last+1));
+   if(!Array.isArray(rows)||rows.length<10)throw Error("Not enough directions");
+   const seen=new Set();
+   const shaped=rows.filter(row=>row&&typeof row==="object"&&clean(row.title,180)&&clean(row.body,900)).slice(0,30).map((row,i)=>({
+    id:key+"-"+i,
+    title:clean(row.title,180),body:clean(row.body,900),type:clean(row.type||"Research website",80),
+    indexedWords:clean(terms.join(" ")+" "+(row.indexedWords||"")+" "+row.title,700),
+    source:"Bitcoin Crusher research Quant",articleId:key
+   })).filter(row=>{const title=row.title.toLowerCase();if(seen.has(title))return false;seen.add(title);return true});
+   if(shaped.length<10)throw Error("Directions repeated");
+   if(current?.spinData.id!==key)return;
+   directions=shaped;render();
+   if(collectedIds.has(key))collect();
+  }catch(error){console.warn("Using dependable research website directions; AI refinement deferred",error)}
  }
  function set(article,spinData){
   if(!article||!spinData?.id||!Array.isArray(spinData.terms))return;
   current={article,spinData};activeId=spinData.id;
   directions=draw(article,spinData);render();
+  void generateSpecificDirections(article,spinData);
  }
  const collectButton=el("collectResearch");if(collectButton)collectButton.addEventListener("click",collect);
  ["focus","online"].forEach(event=>global.addEventListener(event,()=>void flush()));
