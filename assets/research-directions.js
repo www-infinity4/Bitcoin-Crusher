@@ -165,9 +165,10 @@
  }
  function set(article,spinData){
   if(!article||!spinData?.id||!Array.isArray(spinData.terms))return;
+  const changingResearch=current?.spinData.id!==spinData.id;
   current={article,spinData};activeId=spinData.id;
-  directions=draw(article,spinData);render();
-  void generateSpecificDirections(article,spinData);
+  if(changingResearch||directions.length<10)directions=draw(article,spinData);
+  render();void generateSpecificDirections(article,spinData);
  }
  const collectButton=el("collectResearch");if(collectButton)collectButton.addEventListener("click",collect);
  ["focus","online"].forEach(event=>global.addEventListener(event,()=>void flush()));
