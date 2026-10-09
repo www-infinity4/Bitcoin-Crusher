@@ -98,6 +98,11 @@ window.RESEARCH = (() => {
 
   function termsForSpin(spinData) {
     const userInput = clean(spinData.userResearchInput || "");
+    const primary = Array.isArray(spinData.researchTerms)
+      ? unique(spinData.researchTerms.map(clean)).slice(0, 4) : [];
+    // Four selected Quant terms direct the research. Reel icons are decorative
+    // and must not silently change the user's subject or the retrieved evidence.
+    if (primary.length === 4) return primary;
     const labels = spinData.symbolLabels || [];
     const symbolTerms = labels.flatMap((label) => DOMAIN_TERMS[label] || []);
     return unique([userInput, ...symbolTerms]).slice(0, 8);
