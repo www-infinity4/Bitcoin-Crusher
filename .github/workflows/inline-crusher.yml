@@ -1,0 +1,21 @@
+name: Inline Bitcoin Crusher Oracle checks
+on:
+  pull_request:
+    paths:
+      - 'index.html'
+      - 'tests/inline-crusher.test.cjs'
+      - '.github/workflows/inline-crusher.yml'
+  push:
+    branches: [main]
+    paths:
+      - 'index.html'
+      - 'tests/inline-crusher.test.cjs'
+jobs:
+  inline-oracle:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: node --test tests/inline-crusher.test.cjs
