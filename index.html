@@ -8,7 +8,7 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/oracle-crusher.css?v=20261009-oracle1" />
+  <link rel="stylesheet" href="assets/oracle-crusher.css?v=20261009-whiteoracle3" />
 <meta name="description" content="Build sourced research cards, reports, studies, and value trails from guided keywords.">
 <link rel="canonical" href="https://quantaphi.org/bitcoin-crusher/">
 <meta property="og:type" content="website"><meta property="og:title" content="Bitcoin Crusher | QuantaPhi Research"><meta property="og:description" content="Build sourced research cards, reports, studies, and value trails from guided keywords."><meta property="og:url" content="https://quantaphi.org/bitcoin-crusher/"><meta property="og:image" content="https://quantaphi.org/bitcoin-crusher/assets/share-preview-v1.png"><meta property="og:image:secure_url" content="https://quantaphi.org/bitcoin-crusher/assets/share-preview-v1.png"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1731"><meta property="og:image:height" content="909"><meta property="og:image:alt" content="Bitcoin Crusher website preview">
@@ -26,41 +26,89 @@
   <main class="oracle-page">
     <section class="oracle-intro">
       <p class="eyebrow">ORACLE RESEARCH ENGINE · FOUR-TERM DISCOVERY</p>
-      <h1>Spin a connection.<br><em>Discover the research.</em></h1>
-      <p>Choose ideas from your Quants. Each suggestion replaces itself when tapped. Four selected terms drive the next spin; your own words can deepen the question.</p>
+      <h1>Collect every word.<br><em>Spin four into research.</em></h1>
+      <p>Add as many words as you like from Quant suggestions or your own typing. Every spin selects four different words from your entire collection, creates a research Quant, and grows a source-backed article with website directions.</p>
     </section>
 
     <section class="oracle-panel research-entry" aria-labelledby="researchHeading">
-      <div class="panel-top"><div><small>01 / RESEARCH INPUT</small><h2 id="researchHeading">Your four-term research field</h2></div><span class="tiny-state" id="quantSource">Loading Quant history…</span></div>
-      <div class="selected-grid" id="selectedTerms" aria-live="polite"></div>
-      <div class="suggest-header"><strong>Tap a suggestion to add it</strong><span>Each tapped button is replaced with a new idea</span></div>
+      <div class="panel-top"><div><small>01 / RESEARCH INPUT</small><h2 id="researchHeading">Your unlimited research collection</h2></div><span class="tiny-state" id="quantSource">Loading Quant history…</span></div>
+      <div class="research-bank-header"><strong id="wordCount">0 collected research terms</strong><small>Every word stays until you remove it</small></div><div class="selected-grid" id="selectedTerms" aria-live="polite"></div>
+      <div class="suggest-header"><strong>Tap unlimited suggestions to collect words</strong><span>Each tapped button is replaced with a new idea</span></div>
       <div class="suggestion-grid" id="suggestionButtons" aria-label="Research keyword suggestions"></div>
       <div class="custom-row">
         <label for="researchIdea">Additional words or your own research question</label>
-        <textarea id="researchIdea" maxlength="1000" rows="3" placeholder="Add a theory, a question, or subjects the suggestions have not shown yet."></textarea>
-        <div class="entry-actions"><button class="quiet-btn" type="button" id="clearTerms">Clear selected terms</button><span id="researchIdeaStatus" role="status">Four terms plus optional text become one source search.</span></div>
+        <textarea id="researchIdea" maxlength="20000" rows="3" placeholder="Type as many words as you want. Tap Add my words, or Spin to add all words before drawing four."></textarea>
+        <div class="entry-actions"><button class="secondary-btn" type="button" id="addWords">Add my words</button><button class="quiet-btn" type="button" id="clearTerms">Clear word collection</button><span id="researchIdeaStatus" role="status">The spinner uses four of YOUR collected terms per spin. Nothing is autofilled.</span></div>
       </div>
     </section>
 
-    <section class="oracle-panel spinner-panel" aria-labelledby="spinHeading">
-      <div class="panel-top"><div><small>02 / DISCOVERY SLOT</small><h2 id="spinHeading">Bitcoin Crusher Spin</h2></div><span class="reward-pill">+0.1 ★ per confirmed spin</span></div>
-      <div class="spin-frame" id="machine">
-        <div class="slot-motto">BITCOIN CRUSHER <span>·</span> RESEARCH MODE</div>
-        <div class="reels" id="reels">
-          <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
-          <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
-          <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
-          <div class="reel" id="reel3"><div class="reel-strip" id="strip3"></div></div>
-          <div class="reel" id="reel4"><div class="reel-strip" id="strip4"></div></div>
+    <section class="oracle-panel spinner-panel" aria-labelledby="spinHeading"><div class="panel-top"><div><small>02 / ORIGINAL FIVE-REEL MACHINE</small><h2 id="spinHeading">Bitcoin Crusher</h2></div><span class="reward-pill">+0.1 ★ per verified spin</span></div>    <!-- SLOT MACHINE -->
+    <section class="machine-wrap original-slot-wrap">
+      <div class="machine" id="machine">
+        <div class="machine-top">
+          <div class="machine-title-bar">
+            <span class="machine-jackpot-light" id="jLight1"></span>
+            <span class="machine-title-text">💎 BITCOIN CRUSHER · ORIGINAL SLOT 💎</span>
+            <span class="machine-jackpot-light" id="jLight2"></span>
+          </div>
+          <div class="machine-ticker" id="ticker">INFINITY RESEARCH · 4 WORDS FROM YOUR COLLECTION · +0.1 STARCOIN</div>
         </div>
-        <div class="slot-foot">
-          <div class="slot-stat"><small>SPINS</small><strong id="spinCounter">0</strong></div>
-          <button id="spinBtn" class="spin-button" type="button"><span>✦</span> SPIN &amp; RESEARCH</button>
-          <div class="slot-stat"><small>POINTS</small><strong id="scoreCounter">0</strong></div>
+
+        <!-- Reels -->
+        <div class="reels-outer">
+          <div class="reels-window">
+            <div class="reels" id="reels">
+              <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
+              <div class="reel-separator"></div>
+              <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
+              <div class="reel-separator"></div>
+              <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
+              <div class="reel-separator"></div>
+              <div class="reel" id="reel3"><div class="reel-strip" id="strip3"></div></div>
+              <div class="reel-separator"></div>
+              <div class="reel" id="reel4"><div class="reel-strip" id="strip4"></div></div>
+            </div>
+            <div class="reels-shine" aria-hidden="true"></div>
+            <div class="reels-scanline" aria-hidden="true"></div>
+          </div>
+        </div>
+
+        <!-- Result display -->
+        <div class="result-bar" id="resultBar">
+          <span class="result-text" id="resultText">Select your words, then pull the lever!</span>
+        </div>
+
+        <!-- Controls -->
+        <div class="controls">
+          <div class="bet-area">
+            <label class="bet-label">SPINS</label>
+            <div class="spin-counter" id="spinCounter">0</div>
+          </div>
+          <button class="spin-btn" id="spinBtn" aria-label="Spin the slot machine">
+            <span class="spin-btn-icon">🎰</span>
+            <span class="spin-btn-label">SPIN &amp; CRUSH</span>
+          </button>
+          <div class="bet-area">
+            <label class="bet-label">SCORE</label>
+            <div class="spin-counter" id="scoreCounter">0</div>
+          </div>
+        </div>
+
+        <!-- Lever -->
+        <div class="lever-wrap" aria-hidden="true">
+          <div class="lever-track">
+            <div class="lever" id="lever">
+              <div class="lever-ball"></div>
+            </div>
+          </div>
         </div>
       </div>
-      <div class="result-box" id="resultBar"><strong id="resultText">Choose four terms to start exploring.</strong><span id="walletRewardStatus" role="status">Shared StarCoin balance updates after cloud confirmation.</span></div>
+
+      <!-- Win flash overlay -->
+      <div class="win-overlay" id="winOverlay" aria-live="assertive" aria-atomic="true"></div>
     </section>
+
+<div class="wallet-reward-line" id="walletRewardStatus" role="status">Rewards credit the shared StarCoin wallet when confirmed.</div></section>
 
     <section id="researchPanel" class="oracle-panel" hidden>
       <div class="panel-top"><div><small>03 / EVIDENCE</small><h2>Latest research token</h2></div><button type="button" class="quiet-btn" id="viewResearchBtn">Read full research →</button></div>
@@ -68,8 +116,15 @@
       <div id="researchPreview" class="research-summary"></div>
     </section>
 
+    <section id="websiteDirections" class="oracle-panel direction-section" hidden>
+      <div class="panel-top"><div><small>04 / PURPLE WEBSITE DIRECTIONS</small><h2>Build from this research Quant</h2></div><a class="secondary-btn" href="/builder-reserve/">Open Builder Reserve ↗</a></div>
+      <p class="direction-description">A single collected research article can generate ten or more website directions. Each purple card carries its source research into Infinity Phi, Omni Phi or QuantaPhi.</p>
+      <div class="reserve-actions"><button id="collectResearch" type="button" class="secondary-btn">Collect research article + directions</button><span id="collectStatus" role="status">Collect stores this research Quant in your private Builder Reserve feed.</span></div>
+      <div id="directionCards" class="direction-grid"></div>
+    </section>
+
     <section class="oracle-panel writer-panel">
-      <div class="panel-top"><div><small>04 / RESEARCH WRITER</small><h2>Write from evidence, not guesses</h2></div><span class="tiny-state">Cloudflare AI + indexed sources</span></div>
+      <div class="panel-top"><div><small>05 / RESEARCH WRITER</small><h2>Write from evidence, not guesses</h2></div><span class="tiny-state">Cloudflare AI + indexed sources</span></div>
       <label for="writerQuestion">What should the writer investigate or explain?</label>
       <textarea id="writerQuestion" rows="3" placeholder="Compare the four terms, identify connections, explain methods, or expand the current research into a structured article."></textarea>
       <div class="entry-actions"><button type="button" class="secondary-btn" id="writeBtn">Develop the research</button><span id="writerStatus" role="status">Source titles and abstracts are sent as evidence when available.</span></div>
@@ -88,8 +143,9 @@
   <script src="/wallet-runtime.js?v=20261008-spinwallet5" data-control-phi-wallet-only="true"></script>
   <script src="assets/token-graph.js"></script>
   <script src="assets/research.js?v=20261008-research2"></script>
-  <script src="assets/quant-suggestions.js?v=20261009-oracle1"></script>
+  <script src="assets/quant-suggestions.js?v=20261009-unlimited3"></script>
   <script src="assets/crusher-wallet.js?v=20261009-oracle1"></script>
-  <script src="assets/app.js?v=20261009-oracle1"></script>
+  <script src="assets/research-directions.js?v=20261009-directions1"></script>
+  <script src="assets/app.js?v=20261009-originalslot2"></script>
 </body>
 </html>
