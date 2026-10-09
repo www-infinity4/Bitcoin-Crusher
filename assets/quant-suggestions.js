@@ -40,7 +40,22 @@
     var forbidden=new Set((skip||[]).map(normalized));
     var eligible=pool.filter(function(x){return !forbidden.has(normalized(x))&&!served.has(normalized(x));});
     if(!eligible.length){served.clear();eligible=pool.filter(function(x){return !forbidden.has(normalized(x));});}
-    if(!eligible.length)return "";
+    if(!eligible.length){
+      // Never show a blank suggestion. Recombine real indexed subject words with
+      // ordinary English research dimensions after the initial index is exhausted.
+      const dimensions=["properties","applications","history","research","systems","materials","technology","safety","design","measurement","economics","physics","chemistry","engineering","science","energy","patterns","methods"];
+      const topics=[...terms,...pool].filter(Boolean).slice(0,400);
+      for(const topic of topics){
+        for(const axis of dimensions){
+          const idea=topic+" "+axis,word=normalized(idea);
+          if(!forbidden.has(word)&&!pool.some(item=>normalized(item)===word))pool.push(idea);
+          if(pool.length>=3000)break;
+        }
+        if(pool.length>=3000)break;
+      }
+      eligible=pool.filter(function(x){return !forbidden.has(normalized(x));});
+    }
+    if(!eligible.length)return pool[Math.floor(Math.random()*pool.length)]||"Research";
     var word=eligible[Math.floor(Math.random()*eligible.length)];
     served.add(normalized(word));return word;
   }
