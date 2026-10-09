@@ -26,8 +26,30 @@
     .hotstepper-note a{color:#5822a9;font-weight:800}
     @media(max-width:480px){.hotstepper-loop{font-size:.62rem}.hotstepper-panel .panel-top h2{font-size:1.12rem}}
   </style>
+  <style id="quanta-crusher-inline-layout">
+    /* The embedded card is the actual Crusher, not a replacement spinner. */
+    body.crusher-embedded{margin:0!important;padding:0!important;background:transparent!important;overflow-x:hidden;color:#321b45}
+    body.crusher-embedded :is(.oracle-bar,.oracle-intro,.hotstepper-panel,.oracle-footer,.oracle-field){display:none!important}
+    body.crusher-embedded .oracle-page{display:flex!important;flex-direction:column!important;gap:15px!important;max-width:100%!important;width:100%!important;padding:8px!important;margin:0!important;box-sizing:border-box!important}
+    body.crusher-embedded .spinner-panel{order:1}
+    body.crusher-embedded .research-entry{order:2}
+    body.crusher-embedded #researchPanel{order:3}
+    body.crusher-embedded #websiteDirections{order:4}
+    body.crusher-embedded .writer-panel{order:5}
+    body.crusher-embedded .oracle-panel{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important}
+    body.crusher-embedded :is(.spinner-panel,.research-entry){border:1px solid #b68be2!important;border-radius:21px!important;background:linear-gradient(150deg,#fffdfd,#f4e8ff)!important;box-shadow:0 8px 22px #7335ae22,0 0 14px #b989ed34!important}
+    body.crusher-embedded .spinner-panel{background:linear-gradient(145deg,#fff4df,#fffdf3 45%,#f3e4ff)!important}
+    body.crusher-embedded .machine-wrap{max-width:100%!important;margin:0 auto!important}
+    body.crusher-embedded #researchPanel{border:1px solid #e5ab65!important;background:#fff8ea!important}
+    body.crusher-embedded #websiteDirections{border:1px solid #9c6bd8!important;background:linear-gradient(140deg,#faf6ff,#e9d6ff)!important}
+    body.crusher-embedded #websiteDirections .direction-grid{min-width:0}
+    body.crusher-embedded [hidden]{display:none!important}
+    body.crusher-embedded :is(button,.secondary-btn,.quiet-btn){max-width:100%;overflow-wrap:anywhere}
+    @media(max-width:420px){body.crusher-embedded .oracle-page{padding:4px!important;gap:12px!important}body.crusher-embedded .oracle-panel{padding:12px!important}body.crusher-embedded .machine-title-text{font-size:clamp(9px,2.6vw,13px)}}
+  </style>
 </head>
 <body class="oracle-surface oracle-crusher">
+  <script>if(new URLSearchParams(location.search).get('embed')==='quanta')document.body.classList.add('crusher-embedded');</script>
   <div class="oracle-field" aria-hidden="true"></div>
   <header class="oracle-bar">
     <a class="oracle-brand" href="/bitcoin-crusher/" aria-label="Bitcoin Crusher home"><span class="brand-glyph">₿</span><span><small>INFINITY · QUANTAPHI</small><strong>Bitcoin Crusher</strong></span></a>
@@ -176,5 +198,26 @@
   <script src="assets/crusher-wallet.js?v=20261009-oracle1"></script>
   <script src="assets/research-directions.js?v=20261009-directions1"></script>
   <script src="assets/app.js?v=20261009-originalslot2"></script>
+  <script id="quanta-crusher-embed-height">
+  (function(){
+    if(new URLSearchParams(location.search).get('embed')!=='quanta'||window.parent===window)return;
+    let scheduled=false;
+    function notify(){
+      if(scheduled)return;scheduled=true;
+      requestAnimationFrame(()=>{
+        scheduled=false;
+        const height=Math.max(document.body?.scrollHeight||0,document.documentElement?.scrollHeight||0);
+        if(height>=400)window.parent.postMessage({type:'quantaphi:crusher-embed-height',height},location.origin);
+      });
+    }
+    document.addEventListener('DOMContentLoaded',()=>{
+      notify();
+      if(window.ResizeObserver)new ResizeObserver(notify).observe(document.querySelector('main')||document.body);
+      document.addEventListener('click',notify);
+      document.addEventListener('input',notify);
+    });
+    window.addEventListener('load',notify);
+  })();
+  </script>
 </body>
 </html>
