@@ -82,7 +82,9 @@
    article:{
     title:clean(a.title,250),question:clean(a.userInput||s.userResearchInput),terms,
     wordBankSize:global.BitcoinCrusherSuggestions?.current?.().length||terms.length,
-    abstract:clean(a.abstract,4500),synthesis:clean(a.runtime?.synthesis?.text||a.discussion||"",9000),
+    abstract:clean(a.abstract,7000),synthesis:clean(a.runtime?.synthesis?.text||"",12000),
+    introduction:clean(a.introduction,8000),methods:clean(a.methods,8000),results:clean(a.results,8000),discussion:clean(a.discussion,8000),conclusion:clean(a.conclusion,8000),
+    doi:clean(a.doi,140),tokenId:clean(a.tokenId,180),
     evidenceStatus:clean(a.evidenceStatus||"pending"),
     hash:clean(a.hash||""),
     sources:(a.sources||[]).slice(0,15).map(x=>({title:x.title,url:x.url,abstract:x.abstract,provider:x.provider}))
@@ -169,6 +171,7 @@
   current={article,spinData};activeId=spinData.id;
   if(changingResearch||directions.length<10)directions=draw(article,spinData);
   render();void generateSpecificDirections(article,spinData);
+  if(collectedIds.has(spinData.id))collect(); // Preserve newly enriched or expanded text in an already collected research Quant.
  }
  const collectButton=el("collectResearch");if(collectButton)collectButton.addEventListener("click",collect);
  ["focus","online"].forEach(event=>global.addEventListener(event,()=>void flush()));
