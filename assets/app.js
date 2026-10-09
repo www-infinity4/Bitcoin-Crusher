@@ -2,12 +2,21 @@
 (function(global){
  "use strict";
  var $=function(id){return document.getElementById(id)};
- var SYMBOLS=[
-  {icon:"₿",label:"BTC",value:3},{icon:"✦",label:"STAR",value:2},
-  {icon:"◆",label:"CRYSTAL",value:4},{icon:"◈",label:"QUANT",value:7},
-  {icon:"☀",label:"ENERGY",value:5},{icon:"⚛",label:"ATOM",value:4},
-  {icon:"⬡",label:"NETWORK",value:6},{icon:"☄",label:"ASTEROID",value:8}
- ];
+ var SYMBOLS = [
+    { emoji: "₿",  label: "BTC",    value: 3,  weight: 8 },
+    { emoji: "💎", label: "DIAM",   value: 5,  weight: 6 },
+    { emoji: "∞",  label: "INF",    value: 8,  weight: 5 },
+    { emoji: "🧱", label: "BLOCK",  value: 4,  weight: 7 },
+    { emoji: "⭐", label: "STAR",   value: 2,  weight: 10 },
+    { emoji: "🍄", label: "MARIO",  value: 6,  weight: 5 },
+    { emoji: "👑", label: "CROWN",  value: 7,  weight: 4 },
+    { emoji: "🚀", label: "PUMP",   value: 9,  weight: 3 },
+    { emoji: "💰", label: "BAG",    value: 4,  weight: 7 },
+    { emoji: "🔥", label: "FIRE",   value: 3,  weight: 9 },
+    { emoji: "🥇", label: "GOLD",   value: 10, weight: 2 },
+    { emoji: "🌕", label: "MOON",   value: 6,  weight: 5 },
+  ];
+
  var state={spinCount:0,score:0,spinning:false,latestArticle:null,activeSpin:0};
  var pendingResearch=new Map();
  function clean(value){return String(value==null?"":value).replace(/\s+/g," ").trim();}
@@ -17,39 +26,79 @@
   if(text!==undefined)e.textContent=String(text);
   return e;
  }
- function pickSymbol(){return SYMBOLS[Math.floor(Math.random()*SYMBOLS.length)];}
- function setReel(index,sym){
-  var strip=$("strip"+index);if(!strip)return;
-  strip.replaceChildren();
-  var symbol=element("div","reel-symbol");
-  symbol.append(element("span","",sym.icon),element("small","",sym.label));
-  strip.appendChild(symbol);
+ function pickSymbol(){
+  const total=SYMBOLS.reduce((a,x)=>a+x.weight,0);let r=Math.random()*total;
+  for(const sym of SYMBOLS){r-=sym.weight;if(r<=0)return sym}
+  return SYMBOLS[SYMBOLS.length-1];
  }
- function initReels(){for(var i=0;i<5;i++)setReel(i,SYMBOLS[i]);}
+ function buildSymbol(sym){
+  const div=element("div","reel-symbol");div.append(element("span","",sym.emoji),element("span","sym-label",sym.label));return div;
+ }
+ function initReels(){
+  for(let i=0;i<5;i++){
+   const strip=$("strip"+i);strip.replaceChildren();
+   for(let j=0;j<24;j++)strip.appendChild(buildSymbol(pickSymbol()));
+   strip.style.transform="translateY(0)";
+  }
+ }
  function randomId(){
   if(global.crypto?.randomUUID)return "crusher_"+global.crypto.randomUUID().replace(/-/g,"");
   var bytes=new Uint8Array(16);global.crypto.getRandomValues(bytes);
   return "crusher_"+Array.from(bytes,function(v){return v.toString(16).padStart(2,"0")}).join("");
  }
  function evaluate(symbols){
-  var counts=new Map();
-  symbols.forEach(function(x){counts.set(x.label,(counts.get(x.label)||0)+1);});
-  var max=Math.max.apply(null,[...counts.values()]);
-  return {score:max===5?100:max===4?40:max===3?15:max===2?5:1,
-          message:max>=4?"Rare connection!":max===3?"Three themes aligned":max===2?"Two themes connected":"New research path discovered"};
+  const counts={};
+  symbols.forEach(sym=>{counts[sym.label]=(counts[sym.label]||0)+1});
+  const max=Math.max(...Object.values(counts));
+  const total=symbols.reduce((sum,sym)=>sum+sym.value,0);
+  if(max===5)return {tier:"jackpot",score:total*50,message:"🎰 JACKPOT! All five match!"};
+  if(max===4)return {tier:"win-big",score:total*12,message:"💎 MEGA WIN — four matched!"};
+  if(max===3)return {tier:"win-medium",score:total*5,message:"⭐ BIG WIN — three matched!"};
+  if(max===2)return {tier:"win-small",score:total*2,message:"Pair found!"};
+  return {tier:"lose",score:0,message:"No symbol match. Research still created."};
+ }
+ function animateReel(reel,strip,finalSymbol,delay,duration){
+  return new Promise(resolve=>{
+   setTimeout(()=>{
+    strip.replaceChildren();
+    const count=20,height=reel.clientHeight||160;
+    for(let i=0;i<count;i++)strip.appendChild(buildSymbol(i===count-1?finalSymbol:pickSymbol()));
+    strip.querySelectorAll(".reel-symbol").forEach(div=>{div.style.height=height+"px";div.style.minHeight=height+"px"});
+    const farY=(count-2)*height;
+    strip.style.transition="none";strip.style.transform="translateY("+farY+"px)";
+    void strip.offsetHeight;
+    strip.style.transition="transform "+duration+"ms cubic-bezier(.17,.67,.35,1.05)";
+    strip.style.transform="translateY("+(-(count-1)*height)+"px)";
+    let settled=false;
+    const done=()=>{
+     if(settled)return;settled=true;
+     strip.replaceChildren(buildSymbol(finalSymbol));
+     strip.style.transition="none";strip.style.transform="translateY(0)";
+     reel.classList.remove("spinning");resolve();
+    };
+    strip.addEventListener("transitionend",done,{once:true});
+    setTimeout(done,duration+500);
+   },delay);
+  });
  }
  function animate(symbols){
-  for(var i=0;i<5;i++)$("reel"+i).classList.add("spinning");
-  return new Promise(function(resolve){
-   var index=0;
-   function settle(){
-    setReel(index,symbols[index]);$("reel"+index).classList.remove("spinning");
-    index++;
-    if(index>=5){resolve();return}
-    setTimeout(settle,110);
-   }
-   setTimeout(settle,300);
+  const promises=symbols.map((sym,i)=>{
+   const reel=$("reel"+i);reel.classList.add("spinning");
+   return animateReel(reel,$("strip"+i),sym,i*220,900+i*180);
   });
+  return Promise.all(promises);
+ }
+ function pullLever(){
+  const lever=$("lever");if(!lever)return;
+  lever.classList.add("pulled");setTimeout(()=>lever.classList.remove("pulled"),520);
+ }
+ function burstCoins(count=6){
+  const machine=$("machine");
+  for(let i=0;i<count;i++)setTimeout(()=>{
+   const coin=element("div","coin-burst",["💰","💎","₿","⭐","🥇","🪙"][i%6]);
+   coin.style.left=(10+Math.random()*75)+"%";coin.style.top=(15+Math.random()*55)+"%";
+   machine.appendChild(coin);setTimeout(()=>coin.remove(),800);
+  },i*75);
  }
  function labelReward(msg){var e=$("walletRewardStatus");if(e)e.textContent=msg}
  function renderBrief(article){
@@ -108,6 +157,7 @@
    var enriched=await global.RESEARCH.enrichWithSearch(article);
    if(spinData.sequence!==state.activeSpin)return;
    state.latestArticle=enriched;renderBrief(enriched);renderWriterDraft(enriched);
+   global.BitcoinCrusherResearchDirections?.set?.(enriched,spinData);
    $("writerStatus").textContent=(enriched.sources||[]).length+" indexed sources; full text not independently verified.";
   }catch(error){
    if(spinData.sequence!==state.activeSpin)return;
@@ -119,20 +169,26 @@
   if(state.spinning)return;
   var suggestions=global.BitcoinCrusherSuggestions;
   if(!suggestions){labelReward("Suggestions are still loading. Try again.");return}
-  var terms=suggestions.fillFour();
-  var notes=clean($("researchIdea").value).slice(0,600);
-  if(terms.length!==4){labelReward("Select four different research terms first.");return}
-  var query=suggestions.query(notes);
+  // Explicit user words join an unlimited collection. Do not silently generate missing terms.
+  var typed=clean($("researchIdea").value);
+  if(typed){suggestions.addMany(typed);$("researchIdea").value="";}
+  var terms=suggestions.drawFour();
+  if(terms.length!==4){labelReward("Add at least four of your own research terms before spinning. No words were autofilled.");return}
+  var notes="";
+  var query=suggestions.query("",terms);
   var spinData={id:randomId(),sequence:++state.activeSpin,spinNumber:++state.spinCount,timestamp:new Date().toISOString(),terms:terms,researchTerms:terms,userResearchInput:query,notes:notes,symbolLabels:[],score:0};
   state.spinning=true;$("spinBtn").disabled=true;
   $("resultText").textContent="Connecting four research subjects…";
   $("researchIdeaStatus").textContent="Four terms selected; manual context preserved in the research token.";
+  pullLever();
   var symbols=Array.from({length:5},pickSymbol);
   spinData.symbolLabels=symbols.map(function(x){return x.label});
   try{
    await animate(symbols);
    var outcome=evaluate(symbols);
    state.score+=outcome.score;spinData.score=outcome.score;
+   if(outcome.tier==="jackpot"){const flash=$("winOverlay");flash.textContent="🎰 JACKPOT! 🎰";flash.classList.add("show");burstCoins(14);setTimeout(()=>flash.classList.remove("show"),2700)}
+   else if(outcome.tier==="win-big")burstCoins(8);
    $("spinCounter").textContent=String(state.spinCount);
    $("scoreCounter").textContent=String(state.score);
    $("resultText").textContent=outcome.message+" · "+terms.join(" + ");
@@ -142,8 +198,9 @@
    }else labelReward("Wallet service unavailable · cannot confirm +0.1 credit yet.");
    var article=global.RESEARCH.generateResearchArticle(spinData);
    state.latestArticle=article;renderBrief(article);
-   $("writerQuestion").value=$("writerQuestion").value.trim()||"Investigate connections, evidence and gaps between "+terms.join(", ")+(notes?". Context: "+notes:"");
-   $("writerStatus").textContent="Retrieving source records for the four-term query…";
+   global.BitcoinCrusherResearchDirections?.set?.(article,spinData);
+   $("writerQuestion").value="Investigate connections, evidence and gaps between "+terms.join(", ");
+   $("writerStatus").textContent="Retrieving source records for "+terms.join(", ")+"…";
    pendingResearch.set(spinData.id,article);
    void research(spinData,article);
   }catch(error){
@@ -162,7 +219,7 @@
   var prompt=[
    "Act as the Bitcoin Crusher source-aware Oracle research writer.",
    "Research question: "+question,
-   "Four-term research field: "+(global.BitcoinCrusherSuggestions?.current()?.join(", ")||"not selected"),
+   "Selected research draw: "+(article?.keywords?.slice(0,4)?.join(", ")||"not selected"),
    "Indexed source records (may include only metadata and abstracts): "+JSON.stringify(readings),
    "Write a structured original explanatory research brief with sections: Question, Evidence, Possible Connections, Limitations, Next Research Steps.",
    "Separate hypotheses from sourced facts. Refer to source titles and URLs when evidence supports claims.",
@@ -186,6 +243,7 @@
  function init(){
   initReels();
   $("spinBtn").addEventListener("click",function(){void spin()});
+  $("lever")?.addEventListener("click",function(){void spin()});
   $("viewResearchBtn").addEventListener("click",openResearch);
   $("researchClose").addEventListener("click",function(){$("researchOverlay").hidden=true});
   $("researchOverlay").addEventListener("click",function(e){if(e.target===this)this.hidden=true});
