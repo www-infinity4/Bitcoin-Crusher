@@ -93,9 +93,9 @@
   }
   function clear(){terms=[];renderSelected();}
   function query(extra) {
-    var combined=terms.join(" · ");
+    var combined=terms.join(" ");
     var appended=clean(extra);
-    return (combined+(appended?" | Research question: "+appended:"")).slice(0,1000);
+    return (combined+(appended?" "+appended:"")).slice(0,1000);
   }
   async function getJSON(path) {
     if(!global.QuantaCloudConnection?.authenticatedFetch)throw new Error("Cloud wallet unavailable");
