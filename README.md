@@ -41,12 +41,24 @@ The main branch also contains [AIR_GAP_SECURITY_RESEARCH_QUEUE.md](AIR_GAP_SECUR
 - Repository-backed cataloging added only through a protected write path.
 
 
+## Permanent Crusher UX and data contracts (October 2026)
+
+- Daylight Oracle appearance: white/light backgrounds, polished purple research cards. Never replace the original slot with a simplified spin display.
+- Preserve the original machine: five fully animated weighted reels, twelve original symbols, physical lever, score tiers, win effects and coin bursts.
+- Unlimited user research word bank: no four-slot limit, and never autofill missing words. Every manually entered word or tapped suggestion joins the bank, and tapped suggestion buttons replenish.
+- Four at spin time only: choose four distinct words from the bank without consuming them. Fewer than four user-collected words blocks spinning.
+- Research Quant provenance: a spin has a unique ID, its four-word query, evidence status, article and source trail. Abstracts are not full-text reviews.
+- Collect, expand, build: the article can be developed by the writer, collected and turned into twelve or more purple website-direction cards. AI refinement is optional and source constrained.
+- Use existing Builder Reserve. Collected articles and directions are stored privately by wallet in the QuantaPhi Cloudflare D1 research collection and read in Builder Reserve. One-click builder navigation is not a token mint.
+- Wallet: only completed unique spin IDs earn +0.1 StarCoin, with authenticated idempotent QuantaPhi and StarQuest receipts. Spin credit is not Share credit and must not increase Share counts.
+
+Public pages: https://quantaphi.org/bitcoin-crusher/ and https://quantaphi.org/builder-reserve/
+
 ## Public product identity
 
 - **Product name:** Bitcoin Crusher
 - **Repository address:** `www-infinity4/Bitcoin-Crusher`
-- **Suggested domain:** `BitcoinCrusher.com`
-- **Domain status:** suggestion only; ownership, DNS, TLS, and deployment are not yet verified
+- **Live hosting:** `https://quantaphi.org/bitcoin-crusher/` via the QuantaPhi Cloudflare site router
 - **Product description:** Turn a question into sourced research, a durable hashed record, and a growing knowledge network.
 
 The repository address remains stable even when the public product name, tagline, domain, navigation, and visual presentation are improved.
