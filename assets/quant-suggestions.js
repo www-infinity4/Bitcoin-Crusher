@@ -63,40 +63,48 @@
       chooser.appendChild(button);
     });
   }
+  const BANK_KEY="bitcoinCrusher:researchWordBank:v2";
+  const USED_KEY="bitcoinCrusher:researchDraws:v2";
+  function loadBank(){try{const x=JSON.parse(global.localStorage.getItem(BANK_KEY)||"[]");return Array.isArray(x)?x.map(clean).filter(Boolean):[]}catch(_){return []}}
+  function persistBank(){try{global.localStorage.setItem(BANK_KEY,JSON.stringify(terms))}catch(_){}}
+  function normalizeBankWord(value){return clean(value).slice(0,90)}
   function renderSelected() {
     if(!selected)return;
     selected.replaceChildren();
-    for(var i=0;i<4;i++){
-      var item=document.createElement("div"); item.className="selected-slot"+(terms[i]?"":" empty");
-      var k=document.createElement("small");k.textContent="TERM "+(i+1);item.appendChild(k);
-      var label=document.createElement("strong");label.textContent=terms[i]||"Tap a suggestion";item.appendChild(label);
-      if(terms[i]){
-        var remove=document.createElement("button");remove.type="button";remove.textContent="Remove";remove.dataset.index=String(i);
-        remove.addEventListener("click",function(){terms.splice(Number(this.dataset.index),1);renderSelected();});
-        item.appendChild(remove);
-      }
-      selected.appendChild(item);
-    }
+    if(!terms.length){const note=document.createElement("p");note.textContent="Your research word bank is empty. Add as many suggestions or your own words as you like.";selected.appendChild(note)}
+    terms.forEach(function(term,index){
+      const chip=document.createElement("span");chip.className="bank-chip";
+      const word=document.createElement("strong");word.textContent=term;chip.appendChild(word);
+      const remove=document.createElement("button");remove.type="button";remove.textContent="×";remove.setAttribute("aria-label","Remove "+term);
+      remove.addEventListener("click",function(){terms.splice(index,1);persistBank();renderSelected()});
+      chip.appendChild(remove);selected.appendChild(chip);
+    });
+    const count=document.getElementById("wordCount");if(count)count.textContent=terms.length+" collected research terms";
   }
   function addTerm(word){
-    word=clean(word).slice(0,65); if(!word)return terms;
-    terms=terms.filter(function(x){return normalized(x)!==normalized(word);});
-    if(terms.length>=4)terms.shift();
-    terms.push(word);renderSelected();return terms.slice();
+    word=normalizeBankWord(word);
+    if(!word||terms.some(function(t){return normalized(t)===normalized(word)}))return terms.slice();
+    terms.push(word);persistBank();renderSelected();return terms.slice();
   }
-  function fillFour() {
-    var attempts=0;
-    while(terms.length<4&&attempts++<30){
-      var next=pick(terms);
-      if(!next)break;addTerm(next);
-    }
-    return terms.slice();
+  function addMany(raw){
+    // Commas and new lines are explicit phrases; plain spaces enter every word.
+    const groups=String(raw||"").split(/[,;\n]+/).flatMap(function(chunk){
+      const v=clean(chunk);return v?v.split(/\s+/):[];
+    });
+    groups.forEach(addTerm);return terms.slice();
   }
-  function clear(){terms=[];renderSelected();}
-  function query(extra) {
-    var combined=terms.join(" ");
-    var appended=clean(extra);
-    return (combined+(appended?" "+appended:"")).slice(0,1000);
+  function drawFour(){
+    if(terms.length<4)return [];
+    const list=terms.slice(),selectedFour=[];
+    // Sample without replacement; the user's word bank is not depleted.
+    for(let i=0;i<4;i++){const j=Math.floor(Math.random()*list.length);selectedFour.push(list.splice(j,1)[0]);}
+    try{global.localStorage.setItem(USED_KEY,JSON.stringify({four:selectedFour,at:new Date().toISOString()}))}catch(_){}
+    return selectedFour;
+  }
+  function clear(){terms=[];persistBank();renderSelected();}
+  function query(extra,four){
+    const chosen=Array.isArray(four)?four:terms;
+    const appended=clean(extra);return (chosen.join(" ")+(appended?" "+appended:"")).slice(0,1000);
   }
   async function getJSON(path) {
     if(!global.QuantaCloudConnection?.authenticatedFetch)throw new Error("Cloud wallet unavailable");
@@ -105,7 +113,7 @@
     return response.json();
   }
   async function load(){
-    renderSelected();fillSuggestions();
+    terms=loadBank();renderSelected();fillSuggestions();
     try{
       await global.QuantaCloudConnection?.ready;
       var results=await Promise.allSettled([getJSON("/v1/quants/history"),getJSON("/v1/quants/card-interactions")]);
@@ -124,7 +132,11 @@
     }
   }
   var clearBtn=global.document.getElementById("clearTerms");if(clearBtn)clearBtn.addEventListener("click",clear);
-  var api={load,addTerm,fillFour,clear,query,current:function(){return terms.slice();},suggestions:function(){return buttonWords.slice();},sourceCount:function(){return sourceCount;}};
+  var addButton=global.document.getElementById("addWords");if(addButton)addButton.addEventListener("click",function(){
+    const box=document.getElementById("researchIdea");if(!box)return;
+    addMany(box.value);box.value="";document.getElementById("researchIdeaStatus").textContent="Added words to your collection; spin will choose four of your words.";
+  });
+  var api={load,addTerm,addMany,drawFour,fillFour:drawFour,clear,query,current:function(){return terms.slice();},suggestions:function(){return buttonWords.slice();},sourceCount:function(){return sourceCount;}};
   global.BitcoinCrusherSuggestions=api;
   if(global.document.readyState==="loading")global.document.addEventListener("DOMContentLoaded",load,{once:true});else load();
 })(window);
