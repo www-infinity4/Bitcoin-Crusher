@@ -8,355 +8,88 @@
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
   <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;600;700;800&family=Share+Tech+Mono&display=swap" rel="stylesheet" />
-  <link rel="stylesheet" href="assets/style.css" />
+  <link rel="stylesheet" href="assets/oracle-crusher.css?v=20261009-oracle1" />
 <meta name="description" content="Build sourced research cards, reports, studies, and value trails from guided keywords.">
 <link rel="canonical" href="https://quantaphi.org/bitcoin-crusher/">
 <meta property="og:type" content="website"><meta property="og:title" content="Bitcoin Crusher | QuantaPhi Research"><meta property="og:description" content="Build sourced research cards, reports, studies, and value trails from guided keywords."><meta property="og:url" content="https://quantaphi.org/bitcoin-crusher/"><meta property="og:image" content="https://quantaphi.org/bitcoin-crusher/assets/share-preview-v1.png"><meta property="og:image:secure_url" content="https://quantaphi.org/bitcoin-crusher/assets/share-preview-v1.png"><meta property="og:image:type" content="image/png"><meta property="og:image:width" content="1731"><meta property="og:image:height" content="909"><meta property="og:image:alt" content="Bitcoin Crusher website preview">
 <meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="Bitcoin Crusher | QuantaPhi Research"><meta name="twitter:description" content="Build sourced research cards, reports, studies, and value trails from guided keywords."><meta name="twitter:image" content="https://quantaphi.org/bitcoin-crusher/assets/share-preview-v1.png"><meta name="twitter:image:alt" content="Bitcoin Crusher website preview">
 </head>
 <body>
-  <!-- Background -->
-  <div class="bg" aria-hidden="true">
-    <div class="bg-grid"></div>
-    <div class="bg-glow bg-glow-1"></div>
-    <div class="bg-glow bg-glow-2"></div>
-    <div class="bg-glow bg-glow-3"></div>
-  </div>
-
-  <!-- ===== HAMBURGER DRAWER ===== -->
-  <div class="ham-overlay" id="hamOverlay"></div>
-  <nav class="ham-drawer" id="hamDrawer" aria-label="Navigation" aria-hidden="true">
-    <div class="ham-head">
-      <span class="ham-brand">Infinity System</span>
-      <button class="ham-close" id="hamClose" aria-label="Close menu">✕</button>
-    </div>
-    <div class="ham-section-label">🪙 Bitcoin Crusher</div>
-    <a class="ham-link" href="https://www-infinity4.github.io/Bitcoin-Crusher/" target="_blank" rel="noopener noreferrer">🔬 Research Engine</a>
-    <a class="ham-link" href="https://github.com/www-infinity4/Bitcoin-Crusher" target="_blank" rel="noopener noreferrer">📁 GitHub Repo</a>
-    <div class="ham-divider"></div>
-    <div class="ham-section-label">🌐 www-infinity4 Projects</div>
-    <a class="ham-link" href="https://github.com/www-infinity4" target="_blank" rel="noopener noreferrer">🚀 GitHub Profile</a>
-    <a class="ham-link" href="https://archive.org/search?query=bitcoin+crusher+infinity" target="_blank" rel="noopener noreferrer">🗄️ Archive.org Search</a>
-    <div class="ham-divider"></div>
-    <div class="ham-section-label">🔬 Research Tools</div>
-    <a class="ham-link" href="research-workspace.html">🔎 Real Research Workspace</a>
-    <a class="ham-link" href="token-network.html">🎨 Color Token Network</a>
-    <a class="ham-link" href="tests/research-integrity.test.html">✅ Research Integrity Test</a>
-    <a class="ham-link" href="https://duckduckgo.com/?q=quantum+computing+research" target="_blank" rel="noopener noreferrer">🦆 DuckDuckGo Science</a>
-    <a class="ham-link" href="https://arxiv.org" target="_blank" rel="noopener noreferrer">📄 arXiv Papers</a>
-    <a class="ham-link" href="https://scholar.google.com" target="_blank" rel="noopener noreferrer">🎓 Google Scholar</a>
-    <div class="ham-divider"></div>
-    <div class="ham-section-label">🎮 Games</div>
-    <a class="ham-link ham-coming-soon" href="#" aria-disabled="true">🎯 Mini-Games (coming soon)</a>
-    <a class="ham-link ham-coming-soon" href="#" aria-disabled="true">📺 Video Gallery (coming soon)</a>
-    <div class="ham-divider"></div>
-    <div class="ham-footer">Bitcoin Crusher v2.1</div>
-  </nav>
-
-  <!-- ===== LOGIN MODAL ===== -->
-  <div class="modal-overlay" id="loginOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="loginModalTitle">
-    <div class="modal" id="loginModal">
-      <div class="modal-head">
-        <span class="modal-title" id="loginModalTitle">🔐 Account</span>
-        <button class="modal-close" id="loginClose" aria-label="Close login modal">✕</button>
-      </div>
-      <!-- Tabs -->
-      <div class="modal-tabs">
-        <button class="modal-tab active" id="tabLogin" data-tab="login">Sign In</button>
-        <button class="modal-tab" id="tabRegister" data-tab="register">Sign Up</button>
-      </div>
-      <!-- Login form -->
-      <div class="modal-body" id="loginForm">
-        <div class="form-grid">
-          <label class="form-label">Username / Email</label>
-          <input class="form-input" id="loginUser" type="text" autocomplete="username" placeholder="Kris or email" />
-          <label class="form-label">Password</label>
-          <input class="form-input" id="loginPass" type="password" autocomplete="current-password" placeholder="••••••••" />
-        </div>
-        <div class="form-actions">
-          <button class="btn" id="btnLogin">Sign In</button>
-        </div>
-        <div class="auth-msg" id="loginMsg"></div>
-      </div>
-      <!-- Register form -->
-      <div class="modal-body" id="registerForm" style="display:none">
-        <div class="form-grid">
-          <label class="form-label">Username</label>
-          <input class="form-input" id="regUser" type="text" autocomplete="username" placeholder="YourName" />
-          <label class="form-label">Email</label>
-          <input class="form-input" id="regEmail" type="email" autocomplete="email" placeholder="you@example.com" />
-          <label class="form-label">Password</label>
-          <input class="form-input" id="regPass" type="password" autocomplete="new-password" placeholder="min 4 chars" />
-        </div>
-        <div class="form-actions">
-          <button class="btn" id="btnRegister">Create Account</button>
-        </div>
-        <div class="auth-msg" id="registerMsg"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== RESEARCH VIEWER MODAL ===== -->
-  <div class="modal-overlay research-overlay" id="researchOverlay" aria-hidden="true" role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
-    <div class="modal research-modal" id="researchModal">
-      <div class="modal-head">
-        <span class="modal-title" id="researchModalTitle">🔬 Research Token</span>
-        <button class="modal-close" id="researchClose" aria-label="Close research viewer">✕</button>
-      </div>
-      <div class="modal-body research-body" id="researchModalBody">
-        <!-- filled dynamically -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ===== TOPBAR ===== -->
-  <header class="topbar">
-    <div class="topbar-left">
-      <button class="ham-btn" id="hamBtn" aria-label="Open navigation menu" aria-expanded="false" aria-controls="hamDrawer">
-        <span class="ham-icon">☰</span>
-      </button>
-      <div class="topbar-brand">
-        <span class="topbar-icon">₿</span>
-        <div>
-          <div class="topbar-kicker">Infinity System</div>
-          <div class="topbar-name">Bitcoin Crusher</div>
-        </div>
-      </div>
-    </div>
-    <div class="topbar-right">
-      <button class="btn btn-xs" id="infinityWalletBtn">Connect Infinity Wallet</button>
-      <div class="user-badge" id="userBadge" style="display:none">
-        <span class="user-badge-name" id="userBadgeName"></span>
-        <span class="user-badge-role" id="userBadgeRole"></span>
-        <button class="btn btn-xs btn-ghost" id="logoutBtn">Sign Out</button>
-      </div>
-      <button class="btn btn-xs" id="loginBtn">🔐 Sign In</button>
-    </div>
+  <div class="oracle-field" aria-hidden="true"></div>
+  <header class="oracle-bar">
+    <a class="oracle-brand" href="/bitcoin-crusher/" aria-label="Bitcoin Crusher home"><span class="brand-glyph">₿</span><span><small>INFINITY · QUANTAPHI</small><strong>Bitcoin Crusher</strong></span></a>
+    <nav class="oracle-links" aria-label="Phi navigation">
+      <a href="/">QuantaPhi</a><a href="/infinity-phi/">Infinity Phi</a><a href="/omni-phi/">Omni Phi</a>
+    </nav>
+    <div class="oracle-wallet" data-control-phi-wallet-host></div>
   </header>
+  <main class="oracle-page">
+    <section class="oracle-intro">
+      <p class="eyebrow">ORACLE RESEARCH ENGINE · FOUR-TERM DISCOVERY</p>
+      <h1>Spin a connection.<br><em>Discover the research.</em></h1>
+      <p>Choose ideas from your Quants. Each suggestion replaces itself when tapped. Four selected terms drive the next spin; your own words can deepen the question.</p>
+    </section>
 
-  <main class="main">
-    <section class="hero">
-      <h1 class="hero-title">Infinity Research Engine</h1>
-      <p class="hero-sub">Enter your own idea or search topic, then spin. Your exact words drive real source discovery and generate a hashed research token.</p>
-      <div class="panel" style="margin-top:18px;text-align:left">
-        <div class="panel-head"><span class="panel-title">YOUR IDEA OR SEARCH TOPIC</span><span class="panel-hint">Required before spinning</span></div>
-        <div class="panel-body">
-          <label class="form-label" for="researchIdea">Words to research and tokenize</label>
-          <textarea class="form-input" id="researchIdea" rows="3" maxlength="1000" placeholder="Example: Hydrogen energy storage, Bitcoin security, silver and copper resonance, or any subject you want researched"></textarea>
-          <div class="auth-msg" id="researchIdeaStatus">Your words will be preserved in the research packet and used to create its token ID.</div>
-        </div>
-      </div>
-      <!-- Token flow visual -->
-      <div class="token-flow" aria-hidden="true">
-        <span class="tf-step">🟡 Spin</span>
-        <span class="tf-arrow">→</span>
-        <span class="tf-step">👑 Token</span>
-        <span class="tf-arrow">→</span>
-        <span class="tf-step">🔬 Research</span>
-        <span class="tf-arrow">→</span>
-        <span class="tf-step">🦾 Commit</span>
-        <span class="tf-arrow">→</span>
-        <span class="tf-step">💰 Value</span>
+    <section class="oracle-panel research-entry" aria-labelledby="researchHeading">
+      <div class="panel-top"><div><small>01 / RESEARCH INPUT</small><h2 id="researchHeading">Your four-term research field</h2></div><span class="tiny-state" id="quantSource">Loading Quant history…</span></div>
+      <div class="selected-grid" id="selectedTerms" aria-live="polite"></div>
+      <div class="suggest-header"><strong>Tap a suggestion to add it</strong><span>Each tapped button is replaced with a new idea</span></div>
+      <div class="suggestion-grid" id="suggestionButtons" aria-label="Research keyword suggestions"></div>
+      <div class="custom-row">
+        <label for="researchIdea">Additional words or your own research question</label>
+        <textarea id="researchIdea" maxlength="1000" rows="3" placeholder="Add a theory, a question, or subjects the suggestions have not shown yet."></textarea>
+        <div class="entry-actions"><button class="quiet-btn" type="button" id="clearTerms">Clear selected terms</button><span id="researchIdeaStatus" role="status">Four terms plus optional text become one source search.</span></div>
       </div>
     </section>
 
-    <!-- SLOT MACHINE -->
-    <section class="machine-wrap">
-      <div class="machine" id="machine">
-        <div class="machine-top">
-          <div class="machine-title-bar">
-            <span class="machine-jackpot-light" id="jLight1"></span>
-            <span class="machine-title-text">💎 BITCOIN CRUSHER 💎</span>
-            <span class="machine-jackpot-light" id="jLight2"></span>
-          </div>
-          <div class="machine-ticker" id="ticker">INFINITY RESEARCH ACTIVE — SOURCING · HASHING · CATALOGING</div>
+    <section class="oracle-panel spinner-panel" aria-labelledby="spinHeading">
+      <div class="panel-top"><div><small>02 / DISCOVERY SLOT</small><h2 id="spinHeading">Bitcoin Crusher Spin</h2></div><span class="reward-pill">+0.1 ★ per confirmed spin</span></div>
+      <div class="spin-frame" id="machine">
+        <div class="slot-motto">BITCOIN CRUSHER <span>·</span> RESEARCH MODE</div>
+        <div class="reels" id="reels">
+          <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
+          <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
+          <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
+          <div class="reel" id="reel3"><div class="reel-strip" id="strip3"></div></div>
+          <div class="reel" id="reel4"><div class="reel-strip" id="strip4"></div></div>
         </div>
-
-        <!-- Reels -->
-        <div class="reels-outer">
-          <div class="reels-window">
-            <div class="reels" id="reels">
-              <div class="reel" id="reel0"><div class="reel-strip" id="strip0"></div></div>
-              <div class="reel-separator"></div>
-              <div class="reel" id="reel1"><div class="reel-strip" id="strip1"></div></div>
-              <div class="reel-separator"></div>
-              <div class="reel" id="reel2"><div class="reel-strip" id="strip2"></div></div>
-              <div class="reel-separator"></div>
-              <div class="reel" id="reel3"><div class="reel-strip" id="strip3"></div></div>
-              <div class="reel-separator"></div>
-              <div class="reel" id="reel4"><div class="reel-strip" id="strip4"></div></div>
-            </div>
-            <div class="reels-shine" aria-hidden="true"></div>
-            <div class="reels-scanline" aria-hidden="true"></div>
-          </div>
-        </div>
-
-        <!-- Result display -->
-        <div class="result-bar" id="resultBar">
-          <span class="result-text" id="resultText">Pull the lever to spin!</span>
-        </div>
-
-        <!-- Controls -->
-        <div class="controls">
-          <div class="bet-area">
-            <label class="bet-label">SPINS</label>
-            <div class="spin-counter" id="spinCounter">0</div>
-          </div>
-          <button class="spin-btn" id="spinBtn" aria-label="Spin the slot machine">
-            <span class="spin-btn-icon">🎰</span>
-            <span class="spin-btn-label">SPIN &amp; CRUSH</span>
-          </button>
-          <div class="bet-area">
-            <label class="bet-label">SCORE</label>
-            <div class="spin-counter" id="scoreCounter">0</div>
-          </div>
-        </div>
-
-        <!-- Lever -->
-        <div class="lever-wrap" aria-hidden="true">
-          <div class="lever-track">
-            <div class="lever" id="lever">
-              <div class="lever-ball"></div>
-            </div>
-          </div>
+        <div class="slot-foot">
+          <div class="slot-stat"><small>SPINS</small><strong id="spinCounter">0</strong></div>
+          <button id="spinBtn" class="spin-button" type="button"><span>✦</span> SPIN &amp; RESEARCH</button>
+          <div class="slot-stat"><small>POINTS</small><strong id="scoreCounter">0</strong></div>
         </div>
       </div>
-
-      <!-- Win flash overlay -->
-      <div class="win-overlay" id="winOverlay" aria-live="assertive" aria-atomic="true"></div>
+      <div class="result-box" id="resultBar"><strong id="resultText">Choose four terms to start exploring.</strong><span id="walletRewardStatus" role="status">Shared StarCoin balance updates after cloud confirmation.</span></div>
     </section>
 
-    <!-- ===== LATEST RESEARCH TOKEN ===== -->
-    <section class="panel" id="researchPanel" style="display:none">
-      <div class="panel-head">
-        <span class="panel-title">🔬 Latest Research Token</span>
-        <div class="panel-head-actions">
-          <span class="panel-hint" id="researchPanelMeta"></span>
-          <button class="btn btn-xs" id="viewResearchBtn">📄 Full Article</button>
-        </div>
-      </div>
-      <div class="panel-body research-preview" id="researchPreview">
-        <!-- filled after each spin -->
-      </div>
+    <section id="researchPanel" class="oracle-panel" hidden>
+      <div class="panel-top"><div><small>03 / EVIDENCE</small><h2>Latest research token</h2></div><button type="button" class="quiet-btn" id="viewResearchBtn">Read full research →</button></div>
+      <p class="tiny-state" id="researchPanelMeta"></p>
+      <div id="researchPreview" class="research-summary"></div>
     </section>
 
-    <!-- ===== AI RESEARCH CHAT ===== -->
-    <section class="panel" id="chatPanel">
-      <div class="panel-head">
-        <span class="panel-title">🤖 Research AI Chat</span>
-        <span class="panel-hint">DuckDuckGo · Archive.org · Science</span>
-      </div>
-      <div class="panel-body">
-        <div class="chat-log" id="chatLog" aria-live="polite" aria-label="Chat messages">
-          <div class="chat-msg ai"><span class="chat-avatar">🤖</span><span class="chat-bubble">Hello! I am the Infinity Research AI. Ask me about science, cryptography, materials, quantum physics, or anything else. I will search and synthesise research for you.</span></div>
-        </div>
-        <div class="chat-input-row">
-          <input type="text" class="form-input chat-input" id="chatInput"
-            placeholder="Ask about quantum computing, blockchain, biology…"
-            aria-label="Chat message input" />
-          <button class="btn chat-send-btn" id="chatSendBtn" aria-label="Send message">↑ Send</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- CONSOLE / LOG -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-title">🛰️ Infinity Console</span>
-        <button class="btn btn-xs btn-ghost" id="clearLog">Clear</button>
-      </div>
-      <pre class="console-log" id="consoleLog">System ready. Sign in and SPIN.\n</pre>
-    </section>
-
-    <!-- HISTORY + EXPORT -->
-    <section class="panel">
-      <div class="panel-head">
-        <span class="panel-title">📜 Spin History (this session)</span>
-        <div class="panel-head-actions">
-          <button class="btn btn-xs" id="exportAllBtn" title="Export all spins + research as HTML report">📦 Export All</button>
-          <span class="panel-hint" id="histCount">0 spins</span>
-        </div>
-      </div>
-      <div class="history" id="history"></div>
-    </section>
-
-    <!-- DEVICE IDENTITY -->
-    <section class="panel" id="identityPanel">
-      <div class="panel-head">
-        <span class="panel-title">🪪 Device Identity</span>
-        <span class="panel-hint">Your 8-block signal address</span>
-      </div>
-      <div class="panel-body">
-        <div class="identity-display" id="identityDisplay" title="Your unique 8-block device identifier">
-          <span class="identity-blocks" id="identityBlocks">········</span>
-        </div>
-        <div class="identity-meta" id="identityMeta"></div>
-        <div class="form-actions">
-          <button class="btn btn-ghost" id="btnCopyId">📋 Copy ID</button>
-          <button class="btn btn-ghost" id="btnRegenId">🔄 Regenerate</button>
-        </div>
-      </div>
-    </section>
-
-    <!-- AI SIGNAL ANALYSIS -->
-    <section class="panel" id="aiPanel">
-      <div class="panel-head">
-        <span class="panel-title">🤖 AI Signal Analysis</span>
-        <span class="panel-hint">Pattern recognition · on-device</span>
-      </div>
-      <div class="panel-body">
-        <div class="ai-status" id="aiStatus">
-          <span class="ai-dot" id="aiDot"></span>
-          <span id="aiStatusText">Awaiting signal data…</span>
-        </div>
-        <pre class="console-log ai-log" id="aiLog">Signal engine ready. Spin to generate pattern data.\n</pre>
-        <div class="ai-prediction" id="aiPrediction"></div>
-      </div>
-    </section>
-
-    <!-- ADMIN PANEL (hidden; admin only) -->
-    <section class="panel admin-panel" id="adminPanel" style="display:none">
-      <div class="panel-head">
-        <span class="panel-title">⚙️ Admin — Repo Config</span>
-        <span class="panel-hint">Admin only · stored in browser</span>
-      </div>
-      <div class="panel-body">
-        <div class="form-grid">
-          <label class="form-label">Owner</label>
-          <input class="form-input" id="cfgOwner" placeholder="www-infinity4" />
-          <label class="form-label">Repo</label>
-          <input class="form-input" id="cfgRepo" placeholder="Bitcoin-Crusher" />
-          <label class="form-label">Branch</label>
-          <input class="form-input" id="cfgBranch" placeholder="main" />
-        </div>
-        <div class="form-actions">
-          <button class="btn" id="btnSaveCfg">Save Config</button>
-          <button class="btn btn-ghost" id="btnLoadCfg">Load Saved</button>
-          <button class="btn btn-ghost" id="btnClearCfg">Clear</button>
-        </div>
-        <div class="repo-link-row" id="repoLinkRow" style="display:none">
-          <a class="repo-link" id="repoLink" href="#" target="_blank" rel="noopener noreferrer">🔗 Open repo on GitHub</a>
-        </div>
-        <div id="adminUserList" style="margin-top:16px"></div>
-      </div>
+    <section class="oracle-panel writer-panel">
+      <div class="panel-top"><div><small>04 / RESEARCH WRITER</small><h2>Write from evidence, not guesses</h2></div><span class="tiny-state">Cloudflare AI + indexed sources</span></div>
+      <label for="writerQuestion">What should the writer investigate or explain?</label>
+      <textarea id="writerQuestion" rows="3" placeholder="Compare the four terms, identify connections, explain methods, or expand the current research into a structured article."></textarea>
+      <div class="entry-actions"><button type="button" class="secondary-btn" id="writeBtn">Develop the research</button><span id="writerStatus" role="status">Source titles and abstracts are sent as evidence when available.</span></div>
+      <article class="writer-output" id="writerOutput" aria-live="polite"><p>The research writer will organize findings, possible connections, source links, and remaining questions after a spin.</p></article>
     </section>
   </main>
 
-  <footer class="footer">
-    <span>Bitcoin Crusher — Infinity Research Engine</span>
-    <span id="infinityWalletStatus">Unified wallet not connected.</span>
-    <span>🧱 Every spin is a record. Every record is forever.</span>
-  </footer>
+  <div class="reader-overlay" id="researchOverlay" hidden role="dialog" aria-modal="true" aria-labelledby="researchModalTitle">
+    <section class="reader-modal"><header><h2 id="researchModalTitle">Source-backed research</h2><button type="button" id="researchClose" class="quiet-btn" aria-label="Close full research">Close ✕</button></header><div id="researchModalBody" class="reader-content"></div></section>
+  </div>
 
-  <script src="assets/cfg.js"></script>
+  <footer class="oracle-footer">Bitcoin Crusher · A QuantaPhi research experience · StarCoin credits are recorded through the shared wallet.</footer>
+  <script src="/cloud-wallet-client.js?v=20261005-legacy-floor2"></script>
+  <script src="/TV-Database/js/auth.js"></script>
+  <script src="/TV-Database/js/starquest-cloud-ledger.js?v=20261004-wallet-recovery2"></script>
+  <script src="/wallet-runtime.js?v=20261008-spinwallet5" data-control-phi-wallet-only="true"></script>
   <script src="assets/token-graph.js"></script>
   <script src="assets/research.js?v=20261008-research2"></script>
-  <script src="assets/auth.js"></script>
-  <script src="assets/avatar-wave.js" data-site="bitcoin-crusher" data-site-name="Bitcoin Crusher" data-marker="₿" data-marker-name="Bitcoin Avatar Coin" data-accent="#f59e0b"></script>
-  <script src="https://www-infinity4.github.io/Mint-For-Infinity/infinity-ai-kernel.js?v=20260814-kernel2"></script>
-  <script src="https://www-infinity4.github.io/Mint-For-Infinity/unified-wallet.js?v=20260812"></script>
-  <script src="assets/infinity-wallet-integration.js?v=20260814-sitebus1"></script>
-  <script src="assets/app.js?v=20260814-sitebus1"></script>
-<script defer src="https://www-infinity4.github.io/Mint-For-Infinity/site-community.js?v=20260831-storage2" data-site-id="BITCOIN-CRUSHER" data-site-title="Bitcoin Crusher" data-share-url="https://www-infinity4.github.io/Bitcoin-Crusher/share.html"></script>
+  <script src="assets/quant-suggestions.js?v=20261009-oracle1"></script>
+  <script src="assets/crusher-wallet.js?v=20261009-oracle1"></script>
+  <script src="assets/app.js?v=20261009-oracle1"></script>
 </body>
 </html>
