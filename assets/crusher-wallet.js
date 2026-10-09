@@ -1,0 +1,75 @@
+/* Bitcoin Crusher · shared QuantaPhi StarCoin wallet bridge */
+(function(global){
+ "use strict";
+ var API="https://quanta-phi-ledger.marvaseater.workers.dev";
+ var QUEUE="bitcoinCrusher:pendingSpinCredits:v1";
+ var status=global.document.getElementById("walletRewardStatus");
+ var running=false;
+ function read(){try{var a=JSON.parse(global.localStorage.getItem(QUEUE)||"[]");return Array.isArray(a)?a:[]}catch(_){return[]}}
+ function save(items){try{global.localStorage.setItem(QUEUE,JSON.stringify(items.slice(-1000)));return true}catch(_){return false}}
+ function note(text){if(status)status.textContent=text}
+ function account(){try{return String(JSON.parse(global.localStorage.getItem("starquest_session")||"null")?.key||"").toLowerCase()}catch(_){return ""}}
+ function connected(){return !!(global.QuantaCloudConnection?.authenticatedFetch && global.QuantaCloudConnection?.hasCredential?.())}
+ async function request(path,options){
+  if(!global.QuantaCloudConnection?.authenticatedFetch)throw Error("shared_wallet_unavailable");
+  var response=await global.QuantaCloudConnection.authenticatedFetch(API+path,options);
+  var data=await response.json().catch(function(){return{}});
+  if(!response.ok)throw Error(data.error||"wallet HTTP "+response.status);
+  return data;
+ }
+ function reconcile(data){
+  if(!data||!Number.isFinite(Number(data.credits_tenths)))return;
+  var balance=Number(data.credits_tenths)/10;
+  global.ControlPhi?.importLegacyStarCoinBalance?.(balance,"quanta-crusher-cloud");
+  global.ControlPhi?.refreshWallet?.();
+  global.dispatchEvent(new CustomEvent("quantaphi:star-coins-cloud",{detail:data}));
+ }
+ async function state(){
+  if(!connected()){note("Wallet not connected · spins remain pending until your shared wallet is available.");return null}
+  var data=await request("/v1/quants/star-coins",{method:"GET",cache:"no-store"});
+  reconcile(data);
+  var pending=read().length;
+  note("Shared wallet ★ "+(Number(data.credits_tenths)/10).toFixed(1)+(pending?" · "+pending+" spin credit(s) pending":" · cloud connected"));
+  return data;
+ }
+ async function flush(){
+  if(running)return false;
+  if(!connected()){note(read().length+" pending spin credit(s) · connect the shared wallet");return false}
+  running=true;
+  try{
+    var pending=read(),user=account();
+    for(var item of pending){
+      if(item.owner&&user&&item.owner!==user)continue; // Never reassign an offline receipt from another account.
+      var data=await request("/v1/quants/crusher-spins",{method:"POST",body:{spin_id:item.id,query:item.query,terms:item.terms,research_hash:item.researchHash}});
+      reconcile(data);
+      save(read().filter(function(x){return x.id!==item.id}));
+      note(data.accepted?("Confirmed +0.1 StarCoin · wallet ★ "+(Number(data.credits_tenths)/10).toFixed(1)):"Spin already recorded · no duplicate StarCoin");
+    }
+    if(!pending.length)await state();
+    return true;
+  }catch(error){
+    note("Spin saved · StarCoin credit pending Cloudflare wallet confirmation.");
+    console.warn("Bitcoin Crusher StarCoin receipt will retry",error);
+    return false;
+  }finally{running=false}
+ }
+ function reward(item){
+  var id=String(item.id||"");
+  if(!/^[a-zA-Z0-9_-]{12,100}$/.test(id)||!Array.isArray(item.terms)||item.terms.length!==4)return false;
+  var list=read();
+  if(!list.some(function(x){return x.id===id;})){
+    list.push({id,terms:item.terms.slice(0,4),query:String(item.query||"").slice(0,1000),researchHash:String(item.researchHash||""),owner:account(),createdAt:new Date().toISOString()});
+    if(!save(list)){note("Wallet storage unavailable · could not queue spin credit.");return false}
+  }
+  note("Research spin completed · syncing +0.1 StarCoin…");
+  void flush();
+  return true;
+ }
+ global.BitcoinCrusherWallet={reward,flush,state,pending:read,connected};
+ var retry=function(){void flush();};
+ global.addEventListener("online",retry);
+ global.addEventListener("focus",retry);
+ global.document.addEventListener("starquest:ledger-connected",retry);
+ global.document.addEventListener("starquest:auth-changed",retry);
+ if(global.document.readyState==="loading")global.document.addEventListener("DOMContentLoaded",retry,{once:true});else retry();
+})(window);
