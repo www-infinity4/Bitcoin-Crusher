@@ -32,6 +32,17 @@
   note("Shared wallet ★ "+(Number(data.credits_tenths)/10).toFixed(1)+(pending?" · "+pending+" spin credit(s) pending":" · cloud connected"));
   return data;
  }
+ async function starQuestSpin(item) {
+  var token=await global.QuantaCloudConnection?.resolveDeviceToken?.();
+  if(!token)throw Error("ledger_not_connected");
+  var response=await global.fetch("https://starquest-ledger.marvaseater.workers.dev/v1/crusher-spins",{
+    method:"POST",headers:{"Content-Type":"application/json","Authorization":"Bearer "+token},
+    cache:"no-store",body:JSON.stringify({spin_id:item.id,query:item.query,terms:item.terms})
+  });
+  var data=await response.json().catch(function(){return{}});
+  if(!response.ok||data.ok===false)throw Error(data.error||"StarQuest wallet sync failed");
+  return data;
+ }
  async function flush(){
   if(running)return false;
   if(!connected()){note(read().length+" pending spin credit(s) · connect the shared wallet");return false}
@@ -39,11 +50,25 @@
   try{
     var pending=read(),user=account();
     for(var item of pending){
-      if(item.owner&&user&&item.owner!==user)continue; // Never reassign an offline receipt from another account.
-      var data=await request("/v1/quants/crusher-spins",{method:"POST",body:{spin_id:item.id,query:item.query,terms:item.terms,research_hash:item.researchHash}});
-      reconcile(data);
-      save(read().filter(function(x){return x.id!==item.id}));
-      note(data.accepted?("Confirmed +0.1 StarCoin · wallet ★ "+(Number(data.credits_tenths)/10).toFixed(1)):"Spin already recorded · no duplicate StarCoin");
+      if(item.owner&&user&&item.owner!==user)continue; // Never reassign offline rewards from a different signed-in account.
+      if(!item.quantaConfirmed){
+        var data=await request("/v1/quants/crusher-spins",{method:"POST",body:{spin_id:item.id,query:item.query,terms:item.terms,research_hash:item.researchHash}});
+        reconcile(data);
+        item.quantaConfirmed=true;
+        save(read().map(function(x){return x.id===item.id?item:x}));
+      }
+      if(!item.starquestConfirmed){
+        var credited=await starQuestSpin(item);
+        if(credited.state){
+          global.ControlPhi?.refreshCloudWallet?.();
+        }
+        item.starquestConfirmed=true;
+        save(read().map(function(x){return x.id===item.id?item:x}));
+      }
+      if(item.quantaConfirmed&&item.starquestConfirmed){
+        save(read().filter(function(x){return x.id!==item.id}));
+        note("Confirmed +0.1 StarCoin in the unified wallet. Spin receipt synchronized to both ledgers.");
+      }
     }
     if(!pending.length)await state();
     return true;
@@ -61,7 +86,7 @@
     list.push({id,terms:item.terms.slice(0,4),query:String(item.query||"").slice(0,1000),researchHash:String(item.researchHash||""),owner:account(),createdAt:new Date().toISOString()});
     if(!save(list)){note("Wallet storage unavailable · could not queue spin credit.");return false}
   }
-  note("Research spin completed · syncing +0.1 StarCoin…");
+  note("Research spin completed · confirming +0.1 StarCoin with both cloud ledgers…");
   void flush();
   return true;
  }
