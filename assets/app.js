@@ -155,7 +155,7 @@
  async function research(spinData,article){
   try{
    var enriched=await global.RESEARCH.enrichWithSearch(article);
-   if(spinData.sequence!==state.activeSpin)return;
+   if(spinData.sequence!==state.activeSpin){global.BitcoinCrusherResearchDirections?.saveArticle?.(enriched,spinData);return}
    state.latestArticle=enriched;renderBrief(enriched);renderWriterDraft(enriched);
    global.BitcoinCrusherResearchDirections?.set?.(enriched,spinData);
    $("writerStatus").textContent=(enriched.sources||[]).length+" indexed sources; full text not independently verified.";
@@ -192,13 +192,14 @@
    $("spinCounter").textContent=String(state.spinCount);
    $("scoreCounter").textContent=String(state.score);
    $("resultText").textContent=outcome.message+" · "+terms.join(" + ");
-   // A unique spin event is emitted once after the animation, never on refresh.
-   if(global.BitcoinCrusherWallet){
-    global.BitcoinCrusherWallet.reward({id:spinData.id,query:query,terms:terms});
-   }else labelReward("Wallet service unavailable · cannot confirm +0.1 credit yet.");
    var article=global.RESEARCH.generateResearchArticle(spinData);
    state.latestArticle=article;renderBrief(article);
    global.BitcoinCrusherResearchDirections?.set?.(article,spinData);
+   // The full article must reach its owner's cloud wallet before crediting.
+   var packet=global.BitcoinCrusherResearchDirections?.packet?.();
+   if(global.BitcoinCrusherWallet&&packet){
+    global.BitcoinCrusherWallet.reward({id:spinData.id,query:query,terms:terms,articlePacket:packet});
+   }else labelReward("Article save pending · wallet service unavailable.");
    $("writerQuestion").value="Investigate connections, evidence and gaps between "+terms.join(", ");
    $("writerStatus").textContent="Retrieving source records for "+terms.join(", ")+"…";
    pendingResearch.set(spinData.id,article);
@@ -241,13 +242,18 @@
     const originalSpin=global.BitcoinCrusherResearchDirections?.current?.spinData;
     if(originalSpin)global.BitcoinCrusherResearchDirections?.set?.(article,originalSpin);
    }
-   status.textContent=readings.length+" indexed source(s) · draft expanded; collect again to update the saved research Quant.";
+   status.textContent=readings.length+" indexed source(s) · draft expanded; saving the updated research to your wallet.";
   }catch(error){
    status.textContent="Writer could not reach the AI service. The indexed research above remains available.";
    output.textContent="The research writer could not finish this request. Please try again; no invented article has been substituted.";
    console.warn("Crusher writer failed",error);
   }finally{output.removeAttribute("aria-busy");button.disabled=false}
  }
+ global.BitcoinCrusherOpenResearch=function(article,spinData){
+  state.latestArticle=article;renderBrief(article);renderWriterDraft(article);
+  global.BitcoinCrusherResearchDirections.set(article,spinData);
+  $("researchPanel").scrollIntoView({behavior:"smooth",block:"start"});
+ };
  function init(){
   initReels();
   $("spinBtn").addEventListener("click",function(){void spin()});
