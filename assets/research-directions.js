@@ -104,9 +104,12 @@
   if(!global.QuantaCloudConnection?.authenticatedFetch)return false;
   syncing=true;
   try{
-   for(const packet of read()){
+   const attempted=new Set();
+   for(;;){
     const owner=JSON.parse(localStorage.getItem("starquest_session")||"null")?.key||"";
-    if(packet.owner&&packet.owner!==owner)continue;
+    const packet=read().find(x=>(!x.owner||x.owner===owner)&&!attempted.has(JSON.stringify(x)));
+    if(!packet)break;
+    attempted.add(JSON.stringify(packet));
     const response=await global.QuantaCloudConnection.authenticatedFetch(API,{method:"POST",body:packet});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok||!payload.ok)throw Error(payload.error||"Research Reserve sync failed");
@@ -200,7 +203,7 @@
  if(new URLSearchParams(location.search).has("history")||new URLSearchParams(location.search).has("article"))document.addEventListener("DOMContentLoaded",()=>void history(),{once:true});
  const collectButton=el("collectResearch");if(collectButton)collectButton.addEventListener("click",collect);
  ["focus","online"].forEach(event=>global.addEventListener(event,()=>void flush()));
- document.addEventListener("starquest:ledger-connected",()=>void flush());
+ document.addEventListener("starquest:ledger-connected",()=>{void flush();if(new URLSearchParams(location.search).has("history")||new URLSearchParams(location.search).has("article"))void history()});
  global.BitcoinCrusherResearchDirections={set,draw,collect,flush,packet:articlePacket,saveArticle(article,spinData){const previous=current,previousDirections=directions;current={article,spinData};directions=draw(article,spinData);const packet=articlePacket();current=previous;directions=previousDirections;queue(packet);void flush()},get current(){return current},get directions(){return directions.slice()}};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>void flush(),{once:true});else void flush();
 })(window);
