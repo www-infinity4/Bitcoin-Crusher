@@ -22,7 +22,7 @@
  const el=id=>document.getElementById(id);
  const clean=(x,max=1000)=>String(x??"").replace(/\s+/g," ").trim().slice(0,max);
  function read(){try{const value=JSON.parse(localStorage.getItem(PENDING)||"[]");return Array.isArray(value)?value:[]}catch{return[]}}
- function write(rows){try{localStorage.setItem(PENDING,JSON.stringify(rows.slice(-120)));return true}catch{return false}}
+ function write(rows){try{localStorage.setItem(PENDING,JSON.stringify(rows));return true}catch{return false}}
  function draw(article, spinData){
   const terms=spinData.terms.slice(0,4),sourceCount=(article.sources||[]).length;
   const topic=terms.join(" · "),sources=sourceCount?sourceCount+" indexed source records":"an exploratory research question without verified sources";
@@ -78,7 +78,7 @@
   if(!current)return null;
   const a=current.article,s=current.spinData,terms=s.terms.slice(0,4);
   return {
-   article_id:s.id,
+   article_id:s.id,revision_at:Date.now(),
    article:{
     title:clean(a.title,250),question:clean(a.userInput||s.userResearchInput),terms,
     wordBankSize:global.BitcoinCrusherSuggestions?.current?.().length||terms.length,
@@ -93,6 +93,7 @@
  }
  function queue(packet){
   if(!packet||!packet.article_id)return false;
+  packet.owner=JSON.parse(localStorage.getItem("starquest_session")||"null")?.key||"";
   const rows=read(),index=rows.findIndex(x=>x.article_id===packet.article_id);
   if(index>=0)rows[index]=packet;else rows.push(packet);
   return write(rows);
@@ -104,10 +105,12 @@
   syncing=true;
   try{
    for(const packet of read()){
+    const owner=JSON.parse(localStorage.getItem("starquest_session")||"null")?.key||"";
+    if(packet.owner&&packet.owner!==owner)continue;
     const response=await global.QuantaCloudConnection.authenticatedFetch(API,{method:"POST",body:packet});
     const payload=await response.json().catch(()=>({}));
     if(!response.ok||!payload.ok)throw Error(payload.error||"Research Reserve sync failed");
-    write(read().filter(x=>x.article_id!==packet.article_id));
+    write(read().filter(x=>x.article_id!==packet.article_id||JSON.stringify(x)!==JSON.stringify(packet)));
     if(current?.spinData.id===packet.article_id)el("collectStatus").textContent="Collected! "+payload.directions+" purple website directions saved in your Builder Reserve. Open Reserve to build.";
    }
    return true;
@@ -171,11 +174,33 @@
   current={article,spinData};activeId=spinData.id;
   if(changingResearch||directions.length<10)directions=draw(article,spinData);
   render();void generateSpecificDirections(article,spinData);
-  if(collectedIds.has(spinData.id))collect(); // Preserve newly enriched or expanded text in an already collected research Quant.
+  collect(); // Every revision is automatically saved with the spin identity.
  }
+ async function history(){
+  const root=el("researchHistoryList");if(!root)return;
+  root.replaceChildren();
+  try{
+   const response=await global.QuantaCloudConnection.authenticatedFetch(API,{method:"GET",cache:"no-store"});
+   const data=await response.json();if(!response.ok||!data.ok)throw Error(data.error||"Wallet history unavailable");
+   for(const row of data.articles||[]){
+    const entry=document.createElement("article");entry.className="direction-card";
+    const heading=document.createElement("h3");heading.textContent=row.article.title;
+    const receipt=document.createElement("p");receipt.textContent=row.credit_id?"+0.1 StarCoin · receipt "+row.credit_id:"Article saved · credit pending";
+    entry.append(heading,receipt,button("Open and develop",()=>{
+     const article={...row.article,runtime:{synthesis:{text:row.article.synthesis||""}},userInput:row.article.question};
+     const spinData={id:row.article_id,terms:row.article.terms,userResearchInput:row.article.question};
+     global.BitcoinCrusherOpenResearch?.(article,spinData);
+    }));root.appendChild(entry);
+    if(new URLSearchParams(location.search).get("article")===row.article_id)entry.querySelector("button").click();
+   }
+   if(!root.children.length)root.textContent="No cloud research articles saved in this wallet yet.";
+  }catch(error){root.textContent="Connect your wallet to load its saved research articles.";console.warn(error)}
+ }
+ el("loadResearchHistory")?.addEventListener("click",history);
+ if(new URLSearchParams(location.search).has("history")||new URLSearchParams(location.search).has("article"))document.addEventListener("DOMContentLoaded",()=>void history(),{once:true});
  const collectButton=el("collectResearch");if(collectButton)collectButton.addEventListener("click",collect);
  ["focus","online"].forEach(event=>global.addEventListener(event,()=>void flush()));
  document.addEventListener("starquest:ledger-connected",()=>void flush());
- global.BitcoinCrusherResearchDirections={set,draw,collect,flush,get current(){return current},get directions(){return directions.slice()}};
+ global.BitcoinCrusherResearchDirections={set,draw,collect,flush,packet:articlePacket,saveArticle(article,spinData){const previous=current,previousDirections=directions;current={article,spinData};directions=draw(article,spinData);const packet=articlePacket();current=previous;directions=previousDirections;queue(packet);void flush()},get current(){return current},get directions(){return directions.slice()}};
  if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",()=>void flush(),{once:true});else void flush();
 })(window);
