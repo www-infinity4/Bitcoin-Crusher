@@ -6,7 +6,7 @@
  var status=global.document.getElementById("walletRewardStatus");
  var running=false;
  function read(){try{var a=JSON.parse(global.localStorage.getItem(QUEUE)||"[]");return Array.isArray(a)?a:[]}catch(_){return[]}}
- function save(items){try{global.localStorage.setItem(QUEUE,JSON.stringify(items.slice(-1000)));return true}catch(_){return false}}
+ function save(items){try{global.localStorage.setItem(QUEUE,JSON.stringify(items));return true}catch(_){return false}}
  function note(text){if(status)status.textContent=text}
  function account(){try{return String(JSON.parse(global.localStorage.getItem("starquest_session")||"null")?.key||"").toLowerCase()}catch(_){return ""}}
  function connected(){return !!(global.QuantaCloudConnection?.authenticatedFetch && global.QuantaCloudConnection?.hasCredential?.())}
@@ -55,6 +55,8 @@
       if(!item)break;
       attempted.add(item.id);
       if(!item.quantaConfirmed){
+        if(!item.articlePacket)throw Error("research_article_required");
+        await request("/v1/quants/crusher-research",{method:"POST",body:item.articlePacket});
         var data=await request("/v1/quants/crusher-spins",{method:"POST",body:{spin_id:item.id,query:item.query,terms:item.terms,research_hash:item.researchHash}});
         reconcile(data);
         item.quantaConfirmed=true;
@@ -88,7 +90,7 @@
   if(!/^[a-zA-Z0-9_-]{12,100}$/.test(id)||!Array.isArray(item.terms)||item.terms.length!==4)return false;
   var list=read();
   if(!list.some(function(x){return x.id===id;})){
-    list.push({id,terms:item.terms.slice(0,4),query:String(item.query||"").slice(0,1000),researchHash:String(item.researchHash||""),owner:account(),createdAt:new Date().toISOString()});
+    list.push({id,terms:item.terms.slice(0,4),query:String(item.query||"").slice(0,1000),researchHash:String(item.researchHash||""),articlePacket:item.articlePacket,owner:account(),createdAt:new Date().toISOString()});
     if(!save(list)){note("Wallet storage unavailable · could not queue spin credit.");return false}
   }
   note("Research spin completed · confirming +0.1 StarCoin with both cloud ledgers…");
