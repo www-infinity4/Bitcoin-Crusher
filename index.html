@@ -18,24 +18,35 @@
   <style id="hotstepper-player-style">
     .hotstepper-panel{margin-bottom:18px}
     .hotstepper-panel .panel-top{gap:12px;flex-wrap:wrap}
-    .hotstepper-loop{font-size:.7rem;font-weight:800;letter-spacing:.07em;color:#6c36be;background:#f2eaff;border:1px solid #b78cec;border-radius:999px;padding:6px 9px;white-space:nowrap}
+    .hotstepper-loop{font-size:.72rem;font-weight:800;letter-spacing:.04em;color:#6c36be;background:#f2eaff;border:1px solid #b78cec;border-radius:999px;padding:6px 10px;white-space:normal}
     .hotstepper-artist{margin:8px 0 12px;color:#62546b;font-size:.91rem}
     .hotstepper-video{width:100%;aspect-ratio:16/9;overflow:hidden;border-radius:15px;border:1px solid #bb8cec;background:#100b19;box-shadow:0 8px 24px #43187824}
     .hotstepper-video iframe{width:100%;height:100%;display:block;border:0}
     .hotstepper-note{margin:10px 0 0;font-size:.8rem;line-height:1.45;color:#594a67}
     .hotstepper-note a{color:#5822a9;font-weight:800}
-    @media(max-width:480px){.hotstepper-loop{font-size:.62rem}.hotstepper-panel .panel-top h2{font-size:1.12rem}}
+    .music-deck{border:0}
+    .music-deck > summary{cursor:pointer;color:#5822a9;font-weight:800;padding:3px 0 11px;font-size:.9rem}
+    .music-song-picker,.music-repeat-modes{display:flex;flex-wrap:wrap;gap:8px;margin:9px 0}
+    .music-song-picker button,.music-repeat-modes button{min-height:43px;border-radius:12px;border:1px solid #ba98dd;background:#fff;color:#49206e;padding:9px 12px;font:inherit;font-size:.86rem;font-weight:750;cursor:pointer;max-width:100%;white-space:normal;text-align:left}
+    .music-song-picker button[aria-pressed="true"],.music-repeat-modes button[aria-pressed="true"]{background:#672ca9;border-color:#672ca9;color:#fff;box-shadow:0 3px 10px #6a31a136}
+    .music-song-picker button:focus-visible,.music-repeat-modes button:focus-visible,.music-deck summary:focus-visible{outline:3px solid #d79538;outline-offset:2px}
+    .music-controls-label{font-weight:800;font-size:.75rem;letter-spacing:.05em;color:#5c4273;margin:12px 0 3px}
+    body.crusher-embedded .hotstepper-panel{padding:12px!important;border:1px solid #ac85db!important;border-radius:18px!important;background:#fbf6ff!important}
+    body.crusher-embedded .hotstepper-panel .panel-top{margin-bottom:6px}
+    body.crusher-embedded .hotstepper-panel .panel-top h2{font-size:1.05rem}
+    @media(max-width:480px){.hotstepper-loop{font-size:.64rem}.hotstepper-panel .panel-top h2{font-size:1.12rem}.music-song-picker button,.music-repeat-modes button{flex:1 1 130px;font-size:.8rem}}
   </style>
   <style id="quanta-crusher-inline-layout">
     /* The embedded card is the actual Crusher, not a replacement spinner. */
     body.crusher-embedded{margin:0!important;padding:0!important;background:transparent!important;overflow-x:hidden;color:#321b45}
-    body.crusher-embedded :is(.oracle-bar,.oracle-intro,.hotstepper-panel,.oracle-footer,.oracle-field){display:none!important}
+    body.crusher-embedded :is(.oracle-bar,.oracle-intro,.oracle-footer,.oracle-field){display:none!important}
     body.crusher-embedded .oracle-page{display:flex!important;flex-direction:column!important;gap:15px!important;max-width:100%!important;width:100%!important;padding:8px!important;margin:0!important;box-sizing:border-box!important}
     body.crusher-embedded .spinner-panel{order:1}
-    body.crusher-embedded .research-entry{order:2}
-    body.crusher-embedded #researchPanel{order:3}
-    body.crusher-embedded #websiteDirections{order:4}
-    body.crusher-embedded .writer-panel{order:5}
+    body.crusher-embedded .hotstepper-panel{order:2}
+    body.crusher-embedded .research-entry{order:3}
+    body.crusher-embedded #researchPanel{order:4}
+    body.crusher-embedded #websiteDirections{order:5}
+    body.crusher-embedded .writer-panel{order:6}
     body.crusher-embedded .oracle-panel{width:100%!important;max-width:100%!important;min-width:0!important;box-sizing:border-box!important;margin:0!important}
     body.crusher-embedded :is(.spinner-panel,.research-entry){border:1px solid #b68be2!important;border-radius:21px!important;background:linear-gradient(150deg,#fffdfd,#f4e8ff)!important;box-shadow:0 8px 22px #7335ae22,0 0 14px #b989ed34!important}
     body.crusher-embedded .spinner-panel{background:linear-gradient(145deg,#fff4df,#fffdf3 45%,#f3e4ff)!important}
@@ -67,18 +78,29 @@
 
     <section class="oracle-panel hotstepper-panel" aria-labelledby="hotstepperTitle">
       <div class="panel-top">
-        <div><small>INFINITY MUSIC · NOW PLAYING</small><h2 id="hotstepperTitle">Here Comes the Hotstepper</h2></div>
-        <span class="hotstepper-loop" aria-label="Video repeat enabled">↻ REPEAT ON</span>
+        <div><small>INFINITY MUSIC · SLOT MACHINE SOUNDTRACK</small><h2 id="hotstepperTitle">Bitcoin Crusher Jukebox</h2></div>
+        <span class="hotstepper-loop" id="musicRepeatLabel" aria-live="polite">↻ TWO SONGS ON REPEAT</span>
       </div>
-      <p class="hotstepper-artist">Ini Kamoze · Official YouTube video (remix)</p>
-      <div class="hotstepper-video">
-        <iframe title="Ini Kamoze — Here Comes the Hotstepper, repeating YouTube player"
-          src="https://www.youtube-nocookie.com/embed/15UffN8eilI?autoplay=1&amp;loop=1&amp;playlist=15UffN8eilI&amp;playsinline=1&amp;rel=0"
-          allow="autoplay; encrypted-media; picture-in-picture; fullscreen"
-          referrerpolicy="strict-origin-when-cross-origin"
-          loading="eager" allowfullscreen></iframe>
-      </div>
-      <p class="hotstepper-note">Autoplay and repeat are enabled. If your phone blocks music starting on its own, tap Play in the video to turn on sound. <a href="https://www.youtube.com/watch?v=15UffN8eilI" target="_blank" rel="noopener noreferrer">Open on YouTube ↗</a></p>
+      <details class="music-deck" id="musicDeck" open>
+        <summary>Music controls · choose songs and repeat</summary>
+        <p class="hotstepper-artist" id="musicSelection" role="status">Here Comes the Hotstepper · Ini Kamoze</p>
+        <p class="music-controls-label">CHOOSE A TRACK</p>
+        <div class="music-song-picker" role="group" aria-label="Choose a music video">
+          <button type="button" data-music-track="hotstepper" aria-pressed="true">Hotstepper · Ini Kamoze</button>
+          <button type="button" data-music-track="aenema" aria-pressed="false">Learn to Swim (Ænema) · TOOL</button>
+          <button type="button" data-music-track="battle" aria-pressed="false">Bob Ross vs. Pablo Picasso · ERB</button>
+        </div>
+        <p class="music-controls-label">REPEAT MODE</p>
+        <div class="music-repeat-modes" role="group" aria-label="Choose repeat mode">
+          <button type="button" data-music-mode="songs" aria-pressed="true">Repeat both songs</button>
+          <button type="button" data-music-mode="all" aria-pressed="false">Repeat all 3</button>
+          <button type="button" data-music-mode="one" aria-pressed="false">Repeat this track</button>
+        </div>
+        <div class="hotstepper-video">
+          <iframe id="crusherMusicFrame" title="Bitcoin Crusher YouTube soundtrack player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen></iframe>
+        </div>
+        <p class="hotstepper-note">Music plays through the official YouTube player. Phone browsers may require tapping Play to enable sound. <a id="musicYouTubeLink" href="https://www.youtube.com/watch?v=15UffN8eilI" target="_blank" rel="noopener noreferrer">Open selected track on YouTube ↗</a></p>
+      </details>
     </section>
 
     <section class="oracle-panel research-entry" aria-labelledby="researchHeading">
@@ -199,6 +221,74 @@
   <script src="assets/crusher-wallet.js?v=20261010-article-wallet1"></script>
   <script src="assets/research-directions.js?v=20261010-article-wallet1"></script>
   <script src="assets/app.js?v=20261010-article-wallet1"></script>
+  <script id="crusher-jukebox">
+  (function () {
+    'use strict';
+    const tracks = {
+      hotstepper: { title: 'Here Comes the Hotstepper', artist: 'Ini Kamoze', id: '15UffN8eilI' },
+      aenema: { title: 'Ænema (Learn to Swim)', artist: 'TOOL', id: 'rHcmnowjfrQ' },
+      battle: { title: 'Bob Ross vs. Pablo Picasso', artist: 'Epic Rap Battles of History', id: 'WGN5xaQkFk0' }
+    };
+    const deck = document.getElementById('musicDeck');
+    const frame = document.getElementById('crusherMusicFrame');
+    const title = document.getElementById('musicSelection');
+    const label = document.getElementById('musicRepeatLabel');
+    const link = document.getElementById('musicYouTubeLink');
+    if (!deck || !frame || !title || !label || !link) return;
+    const embedded = document.body.classList.contains('crusher-embedded');
+    let selected = 'hotstepper';
+    let mode = 'songs';
+    // The embedded Crusher stays compact until the user chooses to open music.
+    if (embedded) deck.open = false;
+    function playlist() {
+      const keys = mode === 'one' ? [selected] :
+        mode === 'all' ? ['hotstepper', 'aenema', 'battle'] : ['hotstepper', 'aenema'];
+      // Keep the chosen track first, then continue through the playlist.
+      return keys.includes(selected) ?
+        [selected].concat(keys.filter(function (key) { return key !== selected; })) : keys;
+    }
+    function render(loadPlayer) {
+      document.querySelectorAll('[data-music-track]').forEach(function (button) {
+        button.setAttribute('aria-pressed', String(button.dataset.musicTrack === selected));
+      });
+      document.querySelectorAll('[data-music-mode]').forEach(function (button) {
+        button.setAttribute('aria-pressed', String(button.dataset.musicMode === mode));
+      });
+      const track = tracks[selected];
+      title.textContent = 'Selected: ' + track.title + ' · ' + track.artist;
+      label.textContent = mode === 'songs' ? '↻ TWO SONGS ON REPEAT' :
+        mode === 'all' ? '↻ ALL THREE ON REPEAT' : '↻ TRACK ON REPEAT';
+      link.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(track.id);
+      if (!loadPlayer || !deck.open) return;
+      const ids = playlist().map(function (key) { return tracks[key].id; });
+      const url = 'https://www.youtube-nocookie.com/embed/' + tracks[selected].id +
+        '?autoplay=1&loop=1&playlist=' + encodeURIComponent(ids.join(',')) +
+        '&playsinline=1&rel=0';
+      if (frame.getAttribute('src') !== url) frame.src = url;
+    }
+    document.querySelectorAll('[data-music-track]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        selected = button.dataset.musicTrack;
+        // The rap battle is selectable even when the two-song mode was active.
+        if (selected === 'battle' && mode === 'songs') mode = 'all';
+        render(true);
+      });
+    });
+    document.querySelectorAll('[data-music-mode]').forEach(function (button) {
+      button.addEventListener('click', function () {
+        mode = button.dataset.musicMode;
+        if (mode === 'songs' && selected === 'battle') selected = 'hotstepper';
+        render(true);
+      });
+    });
+    deck.addEventListener('toggle', function () {
+      if (deck.open) render(true);
+      // When collapsed, stop playback instead of leaving invisible audio running.
+      else { frame.removeAttribute('src'); }
+    });
+    render(!embedded);
+  })();
+  </script>
   <script id="quanta-crusher-embed-height">
   (function(){
     if(new URLSearchParams(location.search).get('embed')!=='quanta'||window.parent===window)return;
