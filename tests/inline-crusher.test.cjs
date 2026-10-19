@@ -24,19 +24,21 @@ test('Quanta embeds the slot first, compact music second, then evidence and dire
  assert.match(html,/type:'quantaphi:crusher-embed-height'/);
  assert.match(html,/window\.parent\.postMessage/);
 });
-test('jukebox offers Hotstepper, TOOL and Bob Ross/Picasso with repeat choices',()=>{
- assert.match(html,/id="musicDeck"/);
+test('jukebox plays all three songs in order using YouTube end-of-track events',()=>{
+ assert.match(html,/id="musicDeck" open/);
  assert.match(html,/id="crusherMusicFrame"/);
  assert.match(html,/id="crusher-jukebox"/);
- for(const name of ['hotstepper','aenema','battle']) {
-   assert.match(html,new RegExp('data-music-track="'+name+'"'));
- }
- for(const mode of ['songs','all','one']) {
-   assert.match(html,new RegExp('data-music-mode="'+mode+'"'));
- }
- for(const id of ['15UffN8eilI','rHcmnowjfrQ','WGN5xaQkFk0']) {
-   assert.ok(html.includes(id),'missing video '+id);
- }
- assert.match(html,/youtube-nocookie\.com\/embed/);
- assert.match(html,/loop=1&playlist=/);
+ for(const name of ['hotstepper','aenema','battle'])
+  assert.match(html,new RegExp('data-music-track="'+name+'"'));
+ for(const id of ['15UffN8eilI','rHcmnowjfrQ','WGN5xaQkFk0'])
+  assert.ok(html.includes(id),'missing video '+id);
+ assert.match(html,/window\.onYouTubeIframeAPIReady/);
+ assert.match(html,/YT\.PlayerState\.ENDED\)advance\(\)/);
+ assert.match(html,/player\.loadVideoById\(tracks\[index\]\.id\)/);
+ assert.match(html,/index===2&&!repeat/);
+ assert.match(html,/let index=0,repeat=true/);
+ assert.match(html,/id="musicNext"/);
+ assert.match(html,/id="musicRepeatToggle"/);
+ assert.match(html,/enablejsapi=1/);
+ assert.doesNotMatch(html,/loop=1&playlist=/);
 });
