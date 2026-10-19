@@ -78,28 +78,28 @@
 
     <section class="oracle-panel hotstepper-panel" aria-labelledby="hotstepperTitle">
       <div class="panel-top">
-        <div><small>INFINITY MUSIC · SLOT MACHINE SOUNDTRACK</small><h2 id="hotstepperTitle">Bitcoin Crusher Jukebox</h2></div>
-        <span class="hotstepper-loop" id="musicRepeatLabel" aria-live="polite">↻ TWO SONGS ON REPEAT</span>
+        <div><small>INFINITY MUSIC · BITCOIN CRUSHER SOUNDTRACK</small><h2 id="hotstepperTitle">Three-Song Jukebox</h2></div>
+        <span class="hotstepper-loop" id="musicRepeatLabel" aria-live="polite">↻ ALL 3 IN ORDER · REPEAT</span>
       </div>
       <details class="music-deck" id="musicDeck" open>
-        <summary>Music controls · choose songs and repeat</summary>
-        <p class="hotstepper-artist" id="musicSelection" role="status">Here Comes the Hotstepper · Ini Kamoze</p>
-        <p class="music-controls-label">CHOOSE A TRACK</p>
-        <div class="music-song-picker" role="group" aria-label="Choose a music video">
-          <button type="button" data-music-track="hotstepper" aria-pressed="true">Hotstepper · Ini Kamoze</button>
-          <button type="button" data-music-track="aenema" aria-pressed="false">Learn to Swim (Ænema) · TOOL</button>
-          <button type="button" data-music-track="battle" aria-pressed="false">Bob Ross vs. Pablo Picasso · ERB</button>
+        <summary>Show / hide soundtrack</summary>
+        <p class="hotstepper-artist" id="musicSelection" role="status">1 / 3 · Here Comes the Hotstepper · Ini Kamoze</p>
+        <p class="music-controls-label">IN ORDER · PLAYS NEXT SONG WHEN THIS ONE ENDS</p>
+        <div class="music-song-picker" role="group" aria-label="Choose a starting song">
+          <button type="button" data-music-track="hotstepper" aria-pressed="true">1 · Hotstepper</button>
+          <button type="button" data-music-track="aenema" aria-pressed="false">2 · TOOL · Learn to Swim</button>
+          <button type="button" data-music-track="battle" aria-pressed="false">3 · Bob Ross vs. Picasso</button>
         </div>
-        <p class="music-controls-label">REPEAT MODE</p>
-        <div class="music-repeat-modes" role="group" aria-label="Choose repeat mode">
-          <button type="button" data-music-mode="songs" aria-pressed="true">Repeat both songs</button>
-          <button type="button" data-music-mode="all" aria-pressed="false">Repeat all 3</button>
-          <button type="button" data-music-mode="one" aria-pressed="false">Repeat this track</button>
+        <div class="music-repeat-modes" role="group" aria-label="Music playback controls">
+          <button type="button" id="musicPlay" aria-label="Play or pause soundtrack">▶ Play / Pause</button>
+          <button type="button" id="musicNext" aria-label="Play next song">Next song →</button>
+          <button type="button" id="musicRepeatToggle" aria-pressed="true">↻ Repeat all 3: ON</button>
         </div>
         <div class="hotstepper-video">
-          <iframe id="crusherMusicFrame" title="Bitcoin Crusher YouTube soundtrack player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" loading="lazy" allowfullscreen></iframe>
+          <iframe id="crusherMusicFrame" title="Bitcoin Crusher three-song YouTube music player" allow="autoplay; encrypted-media; picture-in-picture; fullscreen" referrerpolicy="strict-origin-when-cross-origin" loading="eager" allowfullscreen></iframe>
         </div>
-        <p class="hotstepper-note">Music plays through the official YouTube player. Phone browsers may require tapping Play to enable sound. <a id="musicYouTubeLink" href="https://www.youtube.com/watch?v=15UffN8eilI" target="_blank" rel="noopener noreferrer">Open selected track on YouTube ↗</a></p>
+        <p class="hotstepper-note" id="musicPlayerNotice" role="status">Tap Play on the video if Chrome requires an initial interaction. The next track will be requested automatically at the end.</p>
+        <p class="hotstepper-note"><a id="musicYouTubeLink" href="https://www.youtube.com/watch?v=15UffN8eilI" target="_blank" rel="noopener noreferrer">Open selected track on YouTube ↗</a></p>
       </details>
     </section>
 
@@ -222,71 +222,110 @@
   <script src="assets/research-directions.js?v=20261010-article-wallet1"></script>
   <script src="assets/app.js?v=20261010-article-wallet1"></script>
   <script id="crusher-jukebox">
-  (function () {
+  (function(){
     'use strict';
-    const tracks = {
-      hotstepper: { title: 'Here Comes the Hotstepper', artist: 'Ini Kamoze', id: '15UffN8eilI' },
-      aenema: { title: 'Ænema (Learn to Swim)', artist: 'TOOL', id: 'rHcmnowjfrQ' },
-      battle: { title: 'Bob Ross vs. Pablo Picasso', artist: 'Epic Rap Battles of History', id: 'WGN5xaQkFk0' }
-    };
-    const deck = document.getElementById('musicDeck');
-    const frame = document.getElementById('crusherMusicFrame');
-    const title = document.getElementById('musicSelection');
-    const label = document.getElementById('musicRepeatLabel');
-    const link = document.getElementById('musicYouTubeLink');
-    if (!deck || !frame || !title || !label || !link) return;
-    const embedded = document.body.classList.contains('crusher-embedded');
-    let selected = 'hotstepper';
-    let mode = 'songs';
-    // The embedded Crusher stays compact until the user chooses to open music.
-    if (embedded) deck.open = false;
-    function playlist() {
-      const keys = mode === 'one' ? [selected] :
-        mode === 'all' ? ['hotstepper', 'aenema', 'battle'] : ['hotstepper', 'aenema'];
-      // Keep the chosen track first, then continue through the playlist.
-      return keys.includes(selected) ?
-        [selected].concat(keys.filter(function (key) { return key !== selected; })) : keys;
+    const tracks=[
+      {key:'hotstepper',title:'Here Comes the Hotstepper',artist:'Ini Kamoze',id:'15UffN8eilI'},
+      {key:'aenema',title:'Ænema (Learn to Swim)',artist:'TOOL',id:'rHcmnowjfrQ'},
+      {key:'battle',title:'Bob Ross vs. Pablo Picasso',artist:'Epic Rap Battles of History',id:'WGN5xaQkFk0'}
+    ];
+    const deck=document.getElementById('musicDeck');
+    const frame=document.getElementById('crusherMusicFrame');
+    const title=document.getElementById('musicSelection');
+    const label=document.getElementById('musicRepeatLabel');
+    const link=document.getElementById('musicYouTubeLink');
+    const notice=document.getElementById('musicPlayerNotice');
+    const play=document.getElementById('musicPlay');
+    const next=document.getElementById('musicNext');
+    const repeatButton=document.getElementById('musicRepeatToggle');
+    if(!deck||!frame||!title||!label||!link||!notice||!play||!next||!repeatButton)return;
+    let index=0,repeat=true,player=null,ready=false,shouldPlay=false,loadingAPI=false;
+    let errorTrack=-1;
+    function update(){
+      const track=tracks[index];
+      title.textContent=(index+1)+' / 3 · '+track.title+' · '+track.artist;
+      label.textContent=repeat?'↻ ALL 3 IN ORDER · REPEAT':'ALL 3 IN ORDER · STOP AFTER #3';
+      repeatButton.textContent=repeat?'↻ Repeat all 3: ON':'Repeat all 3: OFF';
+      repeatButton.setAttribute('aria-pressed',String(repeat));
+      link.href='https://www.youtube.com/watch?v='+track.id;
+      document.querySelectorAll('[data-music-track]').forEach(function(button){
+        button.setAttribute('aria-pressed',String(button.dataset.musicTrack===track.key));
+      });
     }
-    function render(loadPlayer) {
-      document.querySelectorAll('[data-music-track]').forEach(function (button) {
-        button.setAttribute('aria-pressed', String(button.dataset.musicTrack === selected));
-      });
-      document.querySelectorAll('[data-music-mode]').forEach(function (button) {
-        button.setAttribute('aria-pressed', String(button.dataset.musicMode === mode));
-      });
-      const track = tracks[selected];
-      title.textContent = 'Selected: ' + track.title + ' · ' + track.artist;
-      label.textContent = mode === 'songs' ? '↻ TWO SONGS ON REPEAT' :
-        mode === 'all' ? '↻ ALL THREE ON REPEAT' : '↻ TRACK ON REPEAT';
-      link.href = 'https://www.youtube.com/watch?v=' + encodeURIComponent(track.id);
-      if (!loadPlayer || !deck.open) return;
-      const ids = playlist().map(function (key) { return tracks[key].id; });
-      const url = 'https://www.youtube-nocookie.com/embed/' + tracks[selected].id +
-        '?autoplay=1&loop=1&playlist=' + encodeURIComponent(ids.join(',')) +
-        '&playsinline=1&rel=0';
-      if (frame.getAttribute('src') !== url) frame.src = url;
+    function setNotice(message){notice.textContent=message;}
+    function select(n,autoplay){
+      index=(n+tracks.length)%tracks.length;
+      errorTrack=-1; update();
+      if(ready&&player){
+        if(autoplay){shouldPlay=true;player.loadVideoById(tracks[index].id);}
+        else player.cueVideoById(tracks[index].id);
+      }else{
+        // Before the API is ready, the embedded video itself remains playable.
+        frame.src='https://www.youtube-nocookie.com/embed/'+tracks[index].id+
+          '?enablejsapi=1&origin='+encodeURIComponent(location.origin)+'&playsinline=1&rel=0';
+      }
     }
-    document.querySelectorAll('[data-music-track]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        selected = button.dataset.musicTrack;
-        // The rap battle is selectable even when the two-song mode was active.
-        if (selected === 'battle' && mode === 'songs') mode = 'all';
-        render(true);
+    function advance(){
+      if(index===2&&!repeat){
+        shouldPlay=false;setNotice('Playlist finished. Tap Play to listen again.');return;
+      }
+      select(index+1,true);
+      setNotice('Now playing song '+(index+1)+' of 3. The playlist repeats in order.');
+    }
+    window.onYouTubeIframeAPIReady=(function(previous){
+      return function(){
+        if(typeof previous==='function')previous();
+        if(!window.YT||typeof window.YT.Player!=='function'||player)return;
+        player=new window.YT.Player('crusherMusicFrame',{events:{
+          onReady:function(event){
+            ready=true;
+            if(shouldPlay)event.target.playVideo();
+            setNotice('Ready: Hotstepper → TOOL → Bob Ross/Picasso → repeat. Tap Play if audio is blocked.');
+          },
+          onStateChange:function(event){
+            if(event.data===window.YT.PlayerState.ENDED)advance();
+            if(event.data===window.YT.PlayerState.PLAYING){shouldPlay=true;setNotice('Playing '+(index+1)+' of 3 · advances automatically at the end.');}
+            if(event.data===window.YT.PlayerState.PAUSED)shouldPlay=false;
+          },
+          onError:function(event){
+            if(errorTrack===index)return;
+            errorTrack=index;
+            setNotice('YouTube could not play this track here (error '+event.data+'). Open it on YouTube, or tap Next song.');
+          },
+          onAutoplayBlocked:function(){
+            setNotice('Chrome blocked automatic playback. Tap Play in the video or the Play / Pause button to continue.');
+          }
+        }});
+      };
+    })(window.onYouTubeIframeAPIReady);
+    if(window.YT&&typeof window.YT.Player==='function')window.onYouTubeIframeAPIReady();
+    else if(!loadingAPI){
+      loadingAPI=true;
+      const js=document.createElement('script');
+      js.src='https://www.youtube.com/iframe_api';js.async=true;
+      js.onerror=function(){setNotice('YouTube player controls could not load. Open a song on YouTube, or retry the page.');};
+      document.head.appendChild(js);
+    }
+    play.addEventListener('click',function(){
+      if(!ready||!player){shouldPlay=true;setNotice('Player loading. If Chrome blocks sound, tap Play on the video.');return;}
+      const state=player.getPlayerState();
+      if(state===window.YT.PlayerState.PLAYING){player.pauseVideo();shouldPlay=false;}
+      else{shouldPlay=true;player.playVideo();}
+    });
+    next.addEventListener('click',function(){advance();});
+    repeatButton.addEventListener('click',function(){repeat=!repeat;update();});
+    document.querySelectorAll('[data-music-track]').forEach(function(button){
+      button.addEventListener('click',function(){
+        const n=tracks.findIndex(t=>t.key===button.dataset.musicTrack);
+        if(n>=0){select(n,true);setNotice('Selected song '+(index+1)+' of 3.');}
       });
     });
-    document.querySelectorAll('[data-music-mode]').forEach(function (button) {
-      button.addEventListener('click', function () {
-        mode = button.dataset.musicMode;
-        if (mode === 'songs' && selected === 'battle') selected = 'hotstepper';
-        render(true);
-      });
+    // Pause music while collapsed; keep controls visible when opened again.
+    deck.addEventListener('toggle',function(){
+      if(!deck.open&&ready&&player){player.pauseVideo();shouldPlay=false;}
     });
-    deck.addEventListener('toggle', function () {
-      if (deck.open) render(true);
-      // When collapsed, stop playback instead of leaving invisible audio running.
-      else { frame.removeAttribute('src'); }
-    });
-    render(!embedded);
+    update();
+    select(0,false);
   })();
   </script>
   <script id="quanta-crusher-embed-height">
