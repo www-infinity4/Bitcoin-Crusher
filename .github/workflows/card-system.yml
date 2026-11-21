@@ -1,0 +1,32 @@
+name: Card System Specification CI
+
+on:
+  push:
+    paths:
+      - 'docs/**'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - 'docs/**'
+      - 'tests/**'
+
+jobs:
+  lint-and-test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+
+      - name: Install markdownlint
+        run: npm install -g markdownlint-cli
+
+      - name: Lint specification markdown
+        run: markdownlint docs/CARD_SYSTEM_SPEC.md
+
+      - name: Run specification tests
+        run: node --test tests/card-system.test.cjs
