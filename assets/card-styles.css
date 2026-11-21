@@ -1,0 +1,14 @@
+/* Card System shared styles – Oracle‑interface palette */
+.card-ticker,
+.card-ledger,
+.card-artifact,
+.card-gravity {
+  background: #ffffff;               /* white surface */
+  color: #2b1b1e;                    /* warm ink */
+  border: 2px solid #c41e3a;         /* red accent */
+  border-radius: 18px;
+  padding: 12px;
+  margin: 12px 0;
+  min-height: 44px;                 /* touch target */
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}

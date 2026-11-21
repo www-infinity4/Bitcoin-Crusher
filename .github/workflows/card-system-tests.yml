@@ -1,0 +1,27 @@
+name: Card System Tests
+
+on:
+  push:
+    paths:
+      - 'assets/**'
+      - 'docs/**'
+      - 'tests/**'
+  pull_request:
+    paths:
+      - 'assets/**'
+      - 'docs/**'
+      - 'tests/**'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up Node
+        uses: actions/setup-node@v3
+        with:
+          node-version: '22'
+      - name: Install dependencies
+        run: npm ci
+      - name: Run card system tests
+        run: node --test tests/card-system.test.cjs
